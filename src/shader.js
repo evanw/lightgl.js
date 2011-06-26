@@ -53,6 +53,22 @@ function isNumber(obj) {
     return Object.prototype.toString.call(obj) == '[object Number]';
 }
 
+// Textures need to be uploaded as integers and we can't distinguish them from doubles
+// because of JavaScript, so we need a separate method for texture uniforms.
+Shader.prototype.textures = function(textures) {
+    gl.useProgram(this.program);
+
+    // Texture uniforms are a number specifying the zero-based index of a texture unit
+    for (var name in textures) {
+        var location = gl.getUniformLocation(this.program, name);
+        if (!location) continue;
+        gl.uniform1i(location, textures[name]);
+    }
+
+    // Allow chaining
+    return this;
+};
+
 Shader.prototype.uniforms = function(uniforms) {
     gl.useProgram(this.program);
 
@@ -61,6 +77,11 @@ Shader.prototype.uniforms = function(uniforms) {
         var location = gl.getUniformLocation(this.program, name);
         if (!location) continue;
         var value = uniforms[name];
+        if (value instanceof Vector) {
+            value = [value.x, value.y, value.z];
+        } else if (value instanceof Matrix) {
+            value = value.m;
+        }
         if (isArray(value)) {
             switch (value.length) {
                 case 1: gl.uniform1fv(location, new Float32Array(value)); break;
@@ -94,9 +115,9 @@ Shader.prototype.uniforms = function(uniforms) {
 Shader.prototype.draw = function(vertexBuffers, indexBuffer) {
     // Sneak the matrices in as uniforms, substituting the 'gl_' prefix for '_gl_'
     this.uniforms({
-        _gl_ModelViewMatrix: gl.modelviewMatrix.m,
-        _gl_ProjectionMatrix: gl.projectionMatrix.m,
-        _gl_ModelViewProjectionMatrix: gl.projectionMatrix.multiply(gl.modelviewMatrix).m
+        _gl_ModelViewMatrix: gl.modelviewMatrix,
+        _gl_ProjectionMatrix: gl.projectionMatrix,
+        _gl_ModelViewProjectionMatrix: gl.projectionMatrix.multiply(gl.modelviewMatrix)
     });
 
     // Allow passing a mesh as the only argument
@@ -109,7 +130,9 @@ Shader.prototype.draw = function(vertexBuffers, indexBuffer) {
     // Point attributes to vertex buffers, substituting the 'gl_' prefix for '_gl_'
     for (var name in vertexBuffers) {
         var vertexBuffer = vertexBuffers[name];
-        var attribute = this.attributes[name] || (this.attributes[name] = gl.getAttribLocation(this.program, name.replace(/^gl_/, '_gl_')));
+        var attribute = this.attributes[name] || gl.getAttribLocation(this.program, name.replace(/^gl_/, '_gl_'));
+        if (attribute == -1) continue;
+        this.attributes[name] = attribute;
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer.buffer);
         gl.enableVertexAttribArray(attribute);
         gl.vertexAttribPointer(attribute, vertexBuffer.spacing, gl.FLOAT, false, 0, 0);
