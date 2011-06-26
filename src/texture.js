@@ -23,6 +23,39 @@ Texture.prototype.unbind = function(unit) {
     gl.bindTexture(gl.TEXTURE_2D, null);
 };
 
+var framebuffer;
+var renderbuffer;
+
+Texture.prototype.drawTo = function(callback) {
+    // Start rendering to this texture
+    var v = gl.getParameter(gl.VIEWPORT);
+    framebuffer = framebuffer || gl.createFramebuffer();
+    renderbuffer = renderbuffer || gl.createRenderbuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+    if (this.width != renderbuffer.width || this.height != renderbuffer.height) {
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, renderbuffer.width = this.width, renderbuffer.height = this.height);
+    }
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.id, 0);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+    gl.viewport(0, 0, this.width, this.height);
+
+    // Do the drawing
+    callback();
+
+    // Stop rendering to this texture
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.viewport(v[0], v[1], v[2], v[3]);
+};
+
+Texture.prototype.swapWith = function(other) {
+    var temp;
+    temp = other.id; other.id = this.id; this.id = temp;
+    temp = other.width; other.width = this.width; this.width = temp;
+    temp = other.height; other.height = this.height; this.height = temp;
+};
+
 Texture.fromImage = function(image) {
     var texture = new Texture(image.width, image.height);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);

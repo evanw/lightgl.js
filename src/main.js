@@ -21,20 +21,20 @@ window.onload = function() {
     gl.matrixMode = function(mode) {
         switch (mode) {
         case gl.MODELVIEW:
-            matrix = gl.modelviewMatrix;
+            matrix = 'modelviewMatrix';
             stack = modelviewStack;
             break;
         case gl.PROJECTION:
-            matrix = gl.projectionMatrix;
+            matrix = 'projectionMatrix';
             stack = projectionStack;
             break;
         default:
             throw 'invalid matrix mode ' + mode;
         }
     };
-    gl.loadIdentity = function() { matrix.m = new Matrix().m; };
-    gl.loadMatrix = function(m) { matrix.m = m.m.slice(); };
-    gl.multMatrix = function(m) { matrix.m = matrix.multiply(m).m; };
+    gl.loadIdentity = function() { gl[matrix].m = new Matrix().m; };
+    gl.loadMatrix = function(m) { gl[matrix].m = m.m.slice(); };
+    gl.multMatrix = function(m) { gl[matrix].m = gl[matrix].multiply(m).m; };
     gl.perspective = function(fov, aspect, near, far) { gl.multMatrix(Matrix.perspective(fov, aspect, near, far)); };
     gl.frustum = function(l, r, b, t, n, f) { gl.multMatrix(Matrix.frustum(l, r, b, t, n, f)); };
     gl.ortho = function(l, r, b, t, n, f) { gl.multMatrix(Matrix.ortho(l, r, b, t, n, f)); };
@@ -42,8 +42,8 @@ window.onload = function() {
     gl.translate = function(x, y, z) { gl.multMatrix(Matrix.translate(x, y, z)); };
     gl.rotate = function(a, x, y, z) { gl.multMatrix(Matrix.rotate(a, x, y, z)); };
     gl.lookAt = function(ex, ey, ez, cx, cy, cz, ux, uy, uz) { gl.multMatrix(Matrix.lookAt(ex, ey, ez, cx, cy, cz, ux, uy, uz)); };
-    gl.pushMatrix = function() { stack.push(matrix.m.slice()); };
-    gl.popMatrix = function() { matrix.m = stack.pop(); };
+    gl.pushMatrix = function() { stack.push(gl[matrix].m.slice()); };
+    gl.popMatrix = function() { gl[matrix].m = stack.pop(); };
     gl.matrixMode(gl.MODELVIEW);
 
     // Set up the animation loop
