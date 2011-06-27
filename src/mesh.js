@@ -61,8 +61,8 @@ Mesh.prototype.computeAABB = function() {
     aabb.max = aabb.min.negative();
     for (var i = 0; i < this.vertices.length; i++) {
         var v = this.vertices[i];
-        aabb.min = aabb.min.min(v);
-        aabb.max = aabb.max.max(v);
+        aabb.min = Vector.min(aabb.min, v);
+        aabb.max = Vector.max(aabb.max, v);
     }
     return aabb;
 };
@@ -93,6 +93,32 @@ Mesh.plane = function(sizeX, sizeY, countX, countY, options) {
             mesh.triangles.push(new Triangle(i, i + 1, i + countX + 1));
             mesh.triangles.push(new Triangle(i + countX + 1, i + 1, i + countX + 2));
         }
+    }
+    mesh.compile();
+    return mesh;
+};
+
+var cubeData = [
+    [0, 4, 2, 6, -1, 0, 0], // -x
+    [1, 3, 5, 7, +1, 0, 0], // +x
+    [0, 1, 4, 5, 0, -1, 0], // -y
+    [2, 6, 3, 7, 0, +1, 0], // +y
+    [0, 2, 1, 3, 0, 0, -1], // -z
+    [4, 5, 6, 7, 0, 0, +1]  // +z
+];
+
+Mesh.cube = function(sizeX, sizeY, sizeZ) {
+    var mesh = new Mesh();
+    for (var i = 0; i < cubeData.length; i++) {
+        var data = cubeData[i], v = i * 4;
+        for (var j = 0; j < 4; j++) {
+            var d = data[j];
+            mesh.vertices.push(new Vector(((d & 1) - 0.5) * sizeX, ((d & 2) / 2 - 0.5) * sizeY, ((d & 4) / 4 - 0.5) * sizeZ));
+            if (mesh.coords) mesh.coords.push(new Vector(j & 1, (j & 2) / 2));
+            if (mesh.normals) mesh.normals.push(new Vector(data[4], data[5], data[6]));
+        }
+        mesh.triangles.push(new Triangle(v, v + 1, v + 2));
+        mesh.triangles.push(new Triangle(v + 2, v + 1, v + 3));
     }
     mesh.compile();
     return mesh;

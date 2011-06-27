@@ -3,6 +3,7 @@ window.onload = function() {
     var canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
+    window.gl = null;
     try { gl = canvas.getContext('webgl'); } catch (e) {}
     try { gl = gl || canvas.getContext('experimental-webgl'); } catch (e) {}
     if (!gl) throw 'WebGL not supported';
@@ -44,23 +45,75 @@ window.onload = function() {
     gl.lookAt = function(ex, ey, ez, cx, cy, cz, ux, uy, uz) { gl.multMatrix(Matrix.lookAt(ex, ey, ez, cx, cy, cz, ux, uy, uz)); };
     gl.pushMatrix = function() { stack.push(gl[matrix].m.slice()); };
     gl.popMatrix = function() { gl[matrix].m = stack.pop(); };
+    gl.project = function(objX, objY, objZ, modelview, projection, viewport) {
+        modelview = modelview || gl.modelviewMatrix;
+        projection = projection || gl.projectionMatrix;
+        viewport = viewport || gl.getParameter(gl.VIEWPORT);
+        var point = projection.transformPoint(modelview.transformPoint(new Vector(objX, objY, objZ)));
+        return new Vector(
+            viewport[0] + viewport[2] * (point.x * 0.5 + 0.5),
+            viewport[1] + viewport[3] * (point.y * 0.5 + 0.5),
+            point.z * 0.5 + 0.5
+        );
+    };
+    gl.unProject = function(winX, winY, winZ, modelview, projection, viewport) {
+        modelview = modelview || gl.modelviewMatrix;
+        projection = projection || gl.projectionMatrix;
+        viewport = viewport || gl.getParameter(gl.VIEWPORT);
+        var point = new Vector(
+            (winX - viewport[0]) / viewport[2] * 2 - 1,
+            (winY - viewport[1]) / viewport[3] * 2 - 1,
+            winZ * 2 - 1
+        );
+        return projection.multiply(modelview).inverse().transformPoint(point);
+    };
     gl.matrixMode(gl.MODELVIEW);
+    gl.autoDraw = true;
 
     // Set up the animation loop
     var post =
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         function(callback) { setTimeout(callback, 1000 / 60); };
-    var time = new Date();
+    var time;
     function frame() {
         var now = new Date();
-        if (window.update) window.update((now - time) / 1000);
+        if (window.update) window.update((now - (time || now)) / 1000);
         time = now;
         if (window.draw) window.draw();
-        post(frame);
+        if (gl.autoDraw) post(frame);
     }
 
     // Draw the initial frame and start the animation loop
     if (window.setup) window.setup();
     frame();
+};
+
+var isDragging = false;
+
+function setMouseInfo(e) {
+    window.mouseX = e.pageX;
+    window.mouseY = e.pageY;
+    for (var obj = gl.canvas; obj; obj = obj.offsetParent) {
+        window.mouseX -= obj.offsetLeft;
+        window.mouseY -= obj.offsetTop;
+    }
+}
+
+document.onmousedown = function(e) {
+    setMouseInfo(e);
+    isDragging = true;
+    if (window.mousePressed) window.mousePressed();
+};
+
+document.onmousemove = function(e) {
+    setMouseInfo(e);
+    if (!isDragging && window.mouseMoved) window.mouseMoved();
+    else if (isDragging && window.mouseDragged) window.mouseDragged();
+};
+
+document.onmouseup = function(e) {
+    setMouseInfo(e);
+    isDragging = false;
+    if (window.mouseReleased) window.mouseReleased();
 };
