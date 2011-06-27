@@ -3,14 +3,14 @@ Texture = function(width, height, options) {
     this.id = gl.createTexture();
     this.width = width;
     this.height = height;
+    this.format = options.format || gl.RGBA;
     gl.bindTexture(gl.TEXTURE_2D, this.id);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, options.magFilter || gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, options.minFilter || gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, options.filter || options.magFilter || gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, options.filter || options.minFilter || gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, options.wrap || options.wrapS || gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, options.wrap || options.wrapT || gl.CLAMP_TO_EDGE);
-    var format = options.format || gl.RGBA;
-    gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, options.type || gl.UNSIGNED_BYTE, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, this.format, width, height, 0, this.format, options.type || gl.UNSIGNED_BYTE, null);
 };
 
 Texture.prototype.bind = function(unit) {
@@ -56,8 +56,8 @@ Texture.prototype.swapWith = function(other) {
     temp = other.height; other.height = this.height; this.height = temp;
 };
 
-Texture.fromImage = function(image) {
-    var texture = new Texture(image.width, image.height);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+Texture.fromImage = function(image, options) {
+    var texture = new Texture(image.width, image.height, options);
+    gl.texImage2D(gl.TEXTURE_2D, 0, texture.format, texture.format, gl.UNSIGNED_BYTE, image);
     return texture;
 };

@@ -56,6 +56,26 @@ Mesh.prototype.compile = function() {
     this.indexBuffer.compile();
 };
 
+Mesh.prototype.computeAABB = function() {
+    var aabb = { min: new Vector(Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE) };
+    aabb.max = aabb.min.negative();
+    for (var i = 0; i < this.vertices.length; i++) {
+        var v = this.vertices[i];
+        aabb.min = aabb.min.min(v);
+        aabb.max = aabb.max.max(v);
+    }
+    return aabb;
+};
+
+Mesh.prototype.computeBoundingSphere = function() {
+    var aabb = this.computeAABB();
+    var sphere = { center: aabb.min.add(aabb.max).divide(2), radius: 0 };
+    for (var i = 0; i < this.vertices.length; i++) {
+        sphere.radius = Math.max(sphere.radius, this.vertices[i].subtract(sphere.center).length());
+    }
+    return sphere;
+};
+
 Mesh.plane = function(sizeX, sizeY, countX, countY, options) {
     var mesh = new Mesh(options);
     for (var y = 0; y <= countY; y++) {
@@ -64,7 +84,7 @@ Mesh.plane = function(sizeX, sizeY, countX, countY, options) {
             var s = x / countX;
             mesh.vertices.push(new Vector((s - 0.5) * sizeX, (t - 0.5) * sizeY, 0));
             if (mesh.coords) mesh.coords.push(new Vector(s, t));
-            if (mesh.normals) mesh.normals.push(new Vector(0, 1, 0));
+            if (mesh.normals) mesh.normals.push(new Vector(0, 0, 1));
         }
     }
     for (var y = 0; y < countY; y++) {

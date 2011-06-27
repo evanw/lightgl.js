@@ -64,6 +64,24 @@ Matrix.prototype.multiply = function(matrix) {
     );
 };
 
+Matrix.prototype.transformPoint = function(v) {
+    var m = this.m;
+    return new Vector(
+        m[0] * v.x + m[1] * v.y + m[2] * v.z + m[3],
+        m[4] * v.x + m[5] * v.y + m[6] * v.z + m[7],
+        m[8] * v.x + m[9] * v.y + m[10] * v.z + m[11]
+    ).divide(m[12] * v.x + m[13] * v.y + m[14] * v.z + m[15]);
+};
+
+Matrix.prototype.transformVector = function(v) {
+    var m = this.m;
+    return new Vector(
+        m[0] * v.x + m[1] * v.y + m[2] * v.z,
+        m[4] * v.x + m[5] * v.y + m[6] * v.z,
+        m[8] * v.x + m[9] * v.y + m[10] * v.z
+    );
+};
+
 Matrix.perspective = function(fov, aspect, near, far) {
     var y = Math.tan(fov * Math.PI / 360) * near;
     var x = y * aspect;
