@@ -1,19 +1,56 @@
+// The API for this library is modeled off of [Processing](http://processing.org) and only
+// supports a single WebGL canvas for simplicity. The global WebGL context is stored in
+// `gl`, which is augmented with additional functions for matrix manipulation.
+// 
+// Example usage:
+// 
+//     <script src="lightgl.js"></script>
+//     <script>
+// 
+//     var time = 0;
+// 
+//     function setup() {
+//         document.body.appendChild(gl.canvas);
+//     }
+// 
+//     function update(seconds) {
+//         time += seconds;
+//     }
+// 
+//     function draw() {
+//         gl.clearColor(1, Math.cos(time), Math.sin(time), 1);
+//         gl.clear(gl.COLOR_BUFFER_BIT);
+//     }
+// 
+//     </script>
+
+// ### Error Handling
+// 
+// To handle errors, like WebGL initialization errors or shader compile errors,
+// just provide a custom implementation of the `fail()` function.
+function fail(text) {
+    if (window.fail) window.fail(text);
+    else throw text;
+}
+
+// ### Initialization
+// When the page is loaded, a WebGL canvas singleton is automatically created. The default
+// resolution is 800x600, which can be changed by setting `gl.canvas.width` and `gl.canvas.height`
+// and then calling `gl.viewport()`.
 window.onload = function() {
-    // Set up WebGL
     var canvas = document.createElement('canvas');
     canvas.width = 800;
     canvas.height = 600;
     window.gl = null;
     try { gl = canvas.getContext('webgl'); } catch (e) {}
     try { gl = gl || canvas.getContext('experimental-webgl'); } catch (e) {}
-    if (!gl) throw 'WebGL not supported';
+    if (!gl) { fail('WebGL not supported'); return; }
 
-    // Add custom enums
+    // Provide an implementation of the OpenGL matrix stack (only modelview
+    // and projection matrices), as well as some useful GLU matrix functions.
     var ENUM = 0x12340000;
     gl.MODELVIEW = ENUM | 1;
     gl.PROJECTION = ENUM | 2;
-
-    // Add matrix funcitons
     gl.modelviewMatrix = new Matrix();
     gl.projectionMatrix = new Matrix();
     var modelviewStack = [];
@@ -70,50 +107,101 @@ window.onload = function() {
     gl.matrixMode(gl.MODELVIEW);
     gl.autoDraw = true;
 
-    // Set up the animation loop
+    // Set up the animation loop. If your application doesn't need continuous
+    // redrawing, set `gl.autoDraw = false` in your `setup()` function.
     var post =
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         function(callback) { setTimeout(callback, 1000 / 60); };
     var time;
     function frame() {
-        var now = new Date();
-        if (window.update) window.update((now - (time || now)) / 1000);
-        time = now;
-        if (window.draw) window.draw();
-        if (gl.autoDraw) post(frame);
+        try {
+            var now = new Date();
+            if (window.update) window.update((now - (time || now)) / 1000);
+            time = now;
+            if (window.draw) window.draw();
+            if (gl.autoDraw) post(frame);
+        } catch (text) {
+            fail(text);
+        }
     }
 
-    // Draw the initial frame and start the animation loop
-    if (window.setup) window.setup();
-    frame();
+    // Draw the initial frame and start the animation loop.
+    try {
+        if (window.setup) window.setup();
+        frame();
+    } catch (text) {
+        fail(text);
+    }
 };
 
-var isDragging = false;
+// ### Mouse Input
+// 
+// The interface for mouse input is also taken from Processing. Mouse state
+// can be accessed through the `mouseX`, `mouseY`, `deltaMouseX`, `deltaMouseY`,
+// and `mouseDragging` global variables. Example usage:
+// 
+//     function mousePressed() {
+//         // Called when any mouse button is pressed
+//     }
+// 
+//     function mouseDragged() {
+//         // Called when the mouse moves while pressed
+//     }
+// 
+//     function mouseMoved() {
+//         // Called when the mouse moves while released
+//     }
+// 
+//     function mouseReleased() {
+//         // Called when any mouse button is released
+//     }
+
+mouseX = mouseY = deltaMouseX = deltaMouseY = 0;
+mouseDragging = false;
+
+var oldMouseX = 0;
+var oldMouseY = 0;
 
 function setMouseInfo(e) {
-    window.mouseX = e.pageX;
-    window.mouseY = e.pageY;
+    mouseX = e.pageX;
+    mouseY = e.pageY;
     for (var obj = gl.canvas; obj; obj = obj.offsetParent) {
-        window.mouseX -= obj.offsetLeft;
-        window.mouseY -= obj.offsetTop;
+        mouseX -= obj.offsetLeft;
+        mouseY -= obj.offsetTop;
     }
+    deltaMouseX = mouseX - oldMouseX;
+    deltaMouseY = mouseY - oldMouseY;
+    oldMouseX = mouseX;
+    oldMouseY = mouseY;
 }
 
 document.onmousedown = function(e) {
     setMouseInfo(e);
-    isDragging = true;
-    if (window.mousePressed) window.mousePressed();
+    mouseDragging = true;
+    try {
+        if (window.mousePressed) window.mousePressed();
+    } catch (text) {
+        fail(text);
+    }
 };
 
 document.onmousemove = function(e) {
     setMouseInfo(e);
-    if (!isDragging && window.mouseMoved) window.mouseMoved();
-    else if (isDragging && window.mouseDragged) window.mouseDragged();
+    try {
+        if (!mouseDragging && window.mouseMoved) window.mouseMoved();
+        else if (mouseDragging && window.mouseDragged) window.mouseDragged();
+    } catch (text) {
+        fail(text);
+    }
 };
 
 document.onmouseup = function(e) {
     setMouseInfo(e);
-    isDragging = false;
-    if (window.mouseReleased) window.mouseReleased();
+    mouseDragging = false;
+    try {
+        if (window.mouseReleased) window.mouseReleased();
+    } catch (text) {
+        fail(text);
+    }
 };

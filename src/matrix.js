@@ -1,3 +1,10 @@
+// Represents a 4x4 matrix.
+
+// ### new Matrix([elements])
+// 
+// This constructor takes 16 arguments, which can be passed individually, as
+// a list, or even as four lists, one for each row. If the arguments are
+// omitted then the identity matrix is constructed instead.
 Matrix = function() {
     this.m = Array.prototype.concat.apply([], arguments);
     if (!this.m.length) {
@@ -10,8 +17,12 @@ Matrix = function() {
     }
 };
 
+// ### .inverse()
+// 
+// Returns the matrix that when multiplied with this matrix results in the
+// identity matrix. This implementation is from the Mesa OpenGL function
+// `__gluInvertMatrixd()` found in `project.c`.
 Matrix.prototype.inverse = function() {
-    // Implementation from the Mesa OpenGL function __gluInvertMatrixd()
     var m = this.m, inv = new Matrix(
         m[5]*m[10]*m[15] - m[5]*m[14]*m[11] - m[6]*m[9]*m[15] + m[6]*m[13]*m[11] + m[7]*m[9]*m[14] - m[7]*m[13]*m[10],
         -m[1]*m[10]*m[15] + m[1]*m[14]*m[11] + m[2]*m[9]*m[15] - m[2]*m[13]*m[11] - m[3]*m[9]*m[14] + m[3]*m[13]*m[10],
@@ -39,6 +50,10 @@ Matrix.prototype.inverse = function() {
     return inv;
 };
 
+// ### .multiply(matrix)
+// 
+// Concatenates the transforms for this matrix and `matrix`.
+// This emulates the OpenGL function `glMultMatrix()`.
 Matrix.prototype.multiply = function(matrix) {
     var a = this.m, b = matrix.m;
     return new Matrix(
@@ -64,6 +79,10 @@ Matrix.prototype.multiply = function(matrix) {
     );
 };
 
+// ### .transformPoint(point)
+// 
+// Transforms the vector as a point with a `w` coordinate of `1`. This
+// means translations will have an effect, for example.
 Matrix.prototype.transformPoint = function(v) {
     var m = this.m;
     return new Vector(
@@ -73,6 +92,10 @@ Matrix.prototype.transformPoint = function(v) {
     ).divide(m[12] * v.x + m[13] * v.y + m[14] * v.z + m[15]);
 };
 
+// ### .transformPoint(vector)
+// 
+// Transforms the vector as a vector with a `w` coordinate of `0`. This
+// means translations will have no effect, for example.
 Matrix.prototype.transformVector = function(v) {
     var m = this.m;
     return new Vector(
@@ -82,12 +105,23 @@ Matrix.prototype.transformVector = function(v) {
     );
 };
 
+// ### .perspective(fov, aspect, near, far)
+// 
+// Sets up a perspective transform, which makes far away objects appear smaller
+// than nearby objects. The `aspect` argument is the width divided by the height
+// of your viewport and `fov` is the top-to-bottom angle of the field of view in
+// degrees. This emulates the OpenGL function `gluPerspective()`.
 Matrix.perspective = function(fov, aspect, near, far) {
     var y = Math.tan(fov * Math.PI / 360) * near;
     var x = y * aspect;
     return Matrix.frustum(-x, x, -y, y, near, far);
 };
 
+// ### .frustum(left, right, bottom, top, near, far)
+// 
+// Sets up a viewing frustum, which is shaped like a truncated pyramid with the
+// camera where the point of the pyramid would be. This emulates the OpenGL
+// function `glFrustum()`.
 Matrix.frustum = function(l, r, b, t, n, f) {
     return new Matrix(
         2*n/(r-l), 0, (r+l)/(r-l), 0,
@@ -97,6 +131,11 @@ Matrix.frustum = function(l, r, b, t, n, f) {
     );
 };
 
+// ### .ortho(left, right, bottom, top, near, far)
+// 
+// Creates an orthographic projection, in which objects are the same size no
+// matter how far away or nearby they are. This emulates the OpenGL function
+// `glOrtho()`.
 Matrix.ortho = function(l, r, b, t, n, f) {
     return new Matrix(
         2/(r-l), 0, 0, (r+l)/(r-l),
@@ -106,6 +145,9 @@ Matrix.ortho = function(l, r, b, t, n, f) {
     );
 };
 
+// ### .scale(x, y, z)
+// 
+// This emulates the OpenGL function `glScale()`.
 Matrix.scale = function(x, y, z) {
     return new Matrix(
         x, 0, 0, 0,
@@ -115,6 +157,9 @@ Matrix.scale = function(x, y, z) {
     );
 };
 
+// ### .translate(x, y, z)
+// 
+// This emulates the OpenGL function `glTranslate()`.
 Matrix.translate = function(x, y, z) {
     return new Matrix(
         1, 0, 0, x,
@@ -124,6 +169,10 @@ Matrix.translate = function(x, y, z) {
     );
 };
 
+// ### .rotate(a, x, y, z)
+// 
+// Creates a matrix that rotates by `a` degrees around the vector `x, y, z`.
+// This emulates the OpenGL function `glRotate()`.
 Matrix.rotate = function(a, x, y, z) {
     if (a && (x || y || z)) {
         var d = Math.sqrt(x*x + y*y + z*z);
@@ -140,6 +189,11 @@ Matrix.rotate = function(a, x, y, z) {
     }
 };
 
+// ### .lookAt(ex, ey, ez, cx, cy, cz, ux, uy, uz)
+// 
+// Create a matrix that puts the camera at the eye point `ex, ey, ez` looking
+// toward the center point `cx, cy, cz` with an up direction of `ux, uy, uz`.
+// This emulates the OpenGL function `gluLookAt()`.
 Matrix.lookAt = function(ex, ey, ez, cx, cy, cz, ux, uy, uz) {
     var e = new Vector(ex, ey, ez);
     var c = new Vector(cx, cy, cz);
