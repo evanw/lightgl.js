@@ -219,8 +219,7 @@ key = null;
 keys = [];
 
 function mapKeyCode(code) {
-    switch (code)
-    {
+    switch (code) {
         case 8: return 'BACKSPACE';
         case 9: return 'TAB';
         case 13: return 'ENTER';

@@ -144,10 +144,24 @@ Shader.prototype.uniforms = function(uniforms) {
 // ### .draw(mesh[, mode])
 // 
 // Sets all uniform matrix attributes, binds all relevant buffers, and draws the
-// mesh geometry as indexed triangles. This method automatically creates and caches
-// vertex attribute pointers for the attributes stored in `mesh`. The mesh can be
-// drawn in wireframe by setting `mode` to `gl.LINES`.
+// mesh geometry as indexed triangles or indexed lines. Set `mode` to `gl.LINES`
+// (and either add indices to `lines` or call `computeWireframe()`) to draw the
+// mesh in wireframe.
 Shader.prototype.draw = function(mesh, mode) {
+    this.drawBuffers(mesh.vertexBuffers,
+        mesh.indexBuffers[mode == gl.LINES ? 'lines' : 'triangles'],
+        mode || gl.TRIANGLES);
+};
+
+// ### .drawBuffers(vertexBuffers, indexBuffer, mode)
+// 
+// Sets all uniform matrix attributes, binds all relevant buffers, and draws the
+// indexed mesh geometry. The `vertexBuffers` argument is a map from attribute
+// names to `Buffer` objects of type `gl.ARRAY_BUFFER`, `indexBuffer` is a `Buffer`
+// object of type `gl.ELEMENT_ARRAY_BUFFER`, and `mode` is a WebGL primitive mode
+// like `gl.TRIANGLES` or `gl.LINES`. This method automatically creates and caches
+// vertex attribute pointers for attributes as needed.
+Shader.prototype.drawBuffers = function(vertexBuffers, indexBuffer, mode) {
     this.uniforms({
         _gl_ModelViewMatrix: gl.modelviewMatrix,
         _gl_ProjectionMatrix: gl.projectionMatrix
@@ -157,10 +171,10 @@ Shader.prototype.draw = function(mesh, mode) {
     });
 
     // Create and enable attribute pointers as necessary.
-    var vertexBuffers = mesh.vertexBuffers;
     for (var attribute in vertexBuffers) {
         var buffer = vertexBuffers[attribute];
-        var location = this.attributes[attribute] || gl.getAttribLocation(this.program, attribute.replace(/^gl_/, '_gl_'));
+        var location = this.attributes[attribute] ||
+            gl.getAttribLocation(this.program, attribute.replace(/^gl_/, '_gl_'));
         if (location == -1) continue;
         this.attributes[attribute] = location;
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer.buffer);
@@ -176,9 +190,8 @@ Shader.prototype.draw = function(mesh, mode) {
     }
 
     // Draw the geometry.
-    var indexBuffer = mesh.indexBuffers[mode == gl.LINES ? 'lines' : 'triangles'];
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer.buffer);
-    gl.drawElements(mode || gl.TRIANGLES, indexBuffer.buffer.length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(mode, indexBuffer.buffer.length, gl.UNSIGNED_SHORT, 0);
 
     return this;
 };
