@@ -48,7 +48,7 @@ Shader = function(vertexSource, fragmentSource) {
     }
     function fix(header, source) {
         source = header + source;
-        regexMap(/gl_\w+/g, header, function(result) {
+        regexMap(/\bgl_\w+\b/g, header, function(result) {
             source = source.replace(new RegExp(result, 'g'), '_' + result);
         });
         return source;
@@ -83,6 +83,7 @@ Shader = function(vertexSource, fragmentSource) {
         isSampler[groups[1]] = 1;
     });
     this.isSampler = isSampler;
+    this.needsMVP = (vertexSource + fragmentSource).indexOf('gl_ModelViewProjectionMatrix') != -1;
 };
 
 function isArray(obj) {
@@ -96,9 +97,7 @@ function isNumber(obj) {
 // ### .uniforms(uniforms)
 // 
 // Set a uniform for each property of `uniforms`. The correct `gl.uniform*()` method is
-// inferred from the value types and from the stored uniform sampler flags. Matrices are
-// automatically transposed, since WebGL uses column-major indices instead of row-major
-// indices.
+// inferred from the value types and from the stored uniform sampler flags.
 Shader.prototype.uniforms = function(uniforms) {
     gl.useProgram(this.program);
 
@@ -117,6 +116,8 @@ Shader.prototype.uniforms = function(uniforms) {
                 case 2: gl.uniform2fv(location, new Float32Array(value)); break;
                 case 3: gl.uniform3fv(location, new Float32Array(value)); break;
                 case 4: gl.uniform4fv(location, new Float32Array(value)); break;
+                // Matrices are automatically transposed, since WebGL uses column-major
+                // indices instead of row-major indices.
                 case 9: gl.uniformMatrix3fv(location, false, new Float32Array([
                     value[0], value[3], value[6],
                     value[1], value[4], value[7],
@@ -148,10 +149,13 @@ Shader.prototype.uniforms = function(uniforms) {
 Shader.prototype.draw = function(mesh) {
     this.uniforms({
         _gl_ModelViewMatrix: gl.modelviewMatrix,
-        _gl_ProjectionMatrix: gl.projectionMatrix,
+        _gl_ProjectionMatrix: gl.projectionMatrix
+    });
+    if (this.needsMVP) this.uniforms({
         _gl_ModelViewProjectionMatrix: gl.projectionMatrix.multiply(gl.modelviewMatrix)
     });
 
+    // Create and enable attribute pointers as necessary.
     var vertexBuffers = mesh.vertexBuffers;
     for (var name in vertexBuffers) {
         var vertexBuffer = vertexBuffers[name];
@@ -163,12 +167,14 @@ Shader.prototype.draw = function(mesh) {
         gl.vertexAttribPointer(attribute, vertexBuffer.buffer.spacing, gl.FLOAT, false, 0, 0);
     }
 
+    // Disable unused attribute pointers.
     for (var name in this.attributes) {
         if (!(name in vertexBuffers)) {
             gl.disableVertexArray(this.attributes[name]);
         }
     }
 
+    // Draw the geometry.
     var indexBuffer = mesh.indexBuffer;
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer.buffer);
     gl.drawElements(gl.TRIANGLES, indexBuffer.buffer.length, gl.UNSIGNED_SHORT, 0);

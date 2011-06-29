@@ -50,6 +50,19 @@ Matrix.prototype.inverse = function() {
     return inv;
 };
 
+// ### .transpose()
+// 
+// Exchanges columns for rows.
+Matrix.prototype.transpose = function() {
+    var m = this.m;
+    return new Matrix(
+        m[0], m[4], m[8], m[12],
+        m[1], m[5], m[9], m[13],
+        m[2], m[6], m[10], m[14],
+        m[3], m[7], m[11], m[15]
+    );
+};
+
 // ### .multiply(matrix)
 // 
 // Concatenates the transforms for this matrix and `matrix`.
@@ -81,7 +94,7 @@ Matrix.prototype.multiply = function(matrix) {
 
 // ### .transformPoint(point)
 // 
-// Transforms the vector as a point with a `w` coordinate of `1`. This
+// Transforms the vector as a point with a w coordinate of 1. This
 // means translations will have an effect, for example.
 Matrix.prototype.transformPoint = function(v) {
     var m = this.m;
@@ -94,7 +107,7 @@ Matrix.prototype.transformPoint = function(v) {
 
 // ### .transformPoint(vector)
 // 
-// Transforms the vector as a vector with a `w` coordinate of `0`. This
+// Transforms the vector as a vector with a w coordinate of 0. This
 // means translations will have no effect, for example.
 Matrix.prototype.transformVector = function(v) {
     var m = this.m;

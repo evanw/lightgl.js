@@ -24,15 +24,6 @@
 // 
 //     </script>
 
-// ### Error Handling
-// 
-// To handle errors, like WebGL initialization errors or shader compile errors,
-// just provide a custom implementation of the `fail()` function.
-function fail(text) {
-    if (window.fail) window.fail(text);
-    else throw text;
-}
-
 // ### Initialization
 // When the page is loaded, a WebGL canvas singleton is automatically created. The default
 // resolution is 800x600, which can be changed by setting `gl.canvas.width` and `gl.canvas.height`
@@ -44,7 +35,7 @@ window.onload = function() {
     window.gl = null;
     try { gl = canvas.getContext('webgl'); } catch (e) {}
     try { gl = gl || canvas.getContext('experimental-webgl'); } catch (e) {}
-    if (!gl) { fail('WebGL not supported'); return; }
+    if (!gl) throw ('WebGL not supported');
 
     // Provide an implementation of the OpenGL matrix stack (only modelview
     // and projection matrices), as well as some useful GLU matrix functions.
@@ -70,18 +61,42 @@ window.onload = function() {
             throw 'invalid matrix mode ' + mode;
         }
     };
-    gl.loadIdentity = function() { gl[matrix].m = new Matrix().m; };
-    gl.loadMatrix = function(m) { gl[matrix].m = m.m.slice(); };
-    gl.multMatrix = function(m) { gl[matrix].m = gl[matrix].multiply(m).m; };
-    gl.perspective = function(fov, aspect, near, far) { gl.multMatrix(Matrix.perspective(fov, aspect, near, far)); };
-    gl.frustum = function(l, r, b, t, n, f) { gl.multMatrix(Matrix.frustum(l, r, b, t, n, f)); };
-    gl.ortho = function(l, r, b, t, n, f) { gl.multMatrix(Matrix.ortho(l, r, b, t, n, f)); };
-    gl.scale = function(x, y, z) { gl.multMatrix(Matrix.scale(x, y, z)); };
-    gl.translate = function(x, y, z) { gl.multMatrix(Matrix.translate(x, y, z)); };
-    gl.rotate = function(a, x, y, z) { gl.multMatrix(Matrix.rotate(a, x, y, z)); };
-    gl.lookAt = function(ex, ey, ez, cx, cy, cz, ux, uy, uz) { gl.multMatrix(Matrix.lookAt(ex, ey, ez, cx, cy, cz, ux, uy, uz)); };
-    gl.pushMatrix = function() { stack.push(gl[matrix].m.slice()); };
-    gl.popMatrix = function() { gl[matrix].m = stack.pop(); };
+    gl.loadIdentity = function() {
+        gl[matrix].m = new Matrix().m;
+    };
+    gl.loadMatrix = function(m) {
+        gl[matrix].m = m.m.slice();
+    };
+    gl.multMatrix = function(m) {
+        gl[matrix].m = gl[matrix].multiply(m).m;
+    };
+    gl.perspective = function(fov, aspect, near, far) {
+        gl.multMatrix(Matrix.perspective(fov, aspect, near, far));
+    };
+    gl.frustum = function(l, r, b, t, n, f) {
+        gl.multMatrix(Matrix.frustum(l, r, b, t, n, f));
+    };
+    gl.ortho = function(l, r, b, t, n, f) {
+        gl.multMatrix(Matrix.ortho(l, r, b, t, n, f));
+    };
+    gl.scale = function(x, y, z) {
+        gl.multMatrix(Matrix.scale(x, y, z));
+    };
+    gl.translate = function(x, y, z) {
+        gl.multMatrix(Matrix.translate(x, y, z));
+    };
+    gl.rotate = function(a, x, y, z) {
+        gl.multMatrix(Matrix.rotate(a, x, y, z));
+    };
+    gl.lookAt = function(ex, ey, ez, cx, cy, cz, ux, uy, uz) {
+        gl.multMatrix(Matrix.lookAt(ex, ey, ez, cx, cy, cz, ux, uy, uz));
+    };
+    gl.pushMatrix = function() {
+        stack.push(gl[matrix].m.slice());
+    };
+    gl.popMatrix = function() {
+        gl[matrix].m = stack.pop();
+    };
     gl.project = function(objX, objY, objZ, modelview, projection, viewport) {
         modelview = modelview || gl.modelviewMatrix;
         projection = projection || gl.projectionMatrix;
@@ -115,24 +130,16 @@ window.onload = function() {
         function(callback) { setTimeout(callback, 1000 / 60); };
     var time;
     function frame() {
-        try {
-            var now = new Date();
-            if (window.update) window.update((now - (time || now)) / 1000);
-            time = now;
-            if (window.draw) window.draw();
-            if (gl.autoDraw) post(frame);
-        } catch (text) {
-            fail(text);
-        }
+        var now = new Date();
+        if (window.update) window.update((now - (time || now)) / 1000);
+        time = now;
+        if (window.draw) window.draw();
+        if (gl.autoDraw) post(frame);
     }
 
     // Draw the initial frame and start the animation loop.
-    try {
-        if (window.setup) window.setup();
-        frame();
-    } catch (text) {
-        fail(text);
-    }
+    if (window.setup) window.setup();
+    frame();
 };
 
 // ### Mouse Input
@@ -179,29 +186,17 @@ function setMouseInfo(e) {
 document.onmousedown = function(e) {
     setMouseInfo(e);
     mouseDragging = true;
-    try {
-        if (window.mousePressed) window.mousePressed();
-    } catch (text) {
-        fail(text);
-    }
+    if (window.mousePressed) window.mousePressed();
 };
 
 document.onmousemove = function(e) {
     setMouseInfo(e);
-    try {
-        if (!mouseDragging && window.mouseMoved) window.mouseMoved();
-        else if (mouseDragging && window.mouseDragged) window.mouseDragged();
-    } catch (text) {
-        fail(text);
-    }
+    if (!mouseDragging && window.mouseMoved) window.mouseMoved();
+    else if (mouseDragging && window.mouseDragged) window.mouseDragged();
 };
 
 document.onmouseup = function(e) {
     setMouseInfo(e);
     mouseDragging = false;
-    try {
-        if (window.mouseReleased) window.mouseReleased();
-    } catch (text) {
-        fail(text);
-    }
+    if (window.mouseReleased) window.mouseReleased();
 };
