@@ -25,7 +25,7 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
         gl.loadIdentity();
         gl.perspective(45, gl.canvas.width / gl.canvas.height, 0.01, 100);
         gl.matrixMode(gl.MODELVIEW);
-        mesh = Mesh.plane(1, 1, 5, 5);
+        mesh = Mesh.cube();
         shader = new Shader('\
             void main() {\
                 gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex, 1.0);\
@@ -47,11 +47,7 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
         gl.translate(0, 0, -5);
         gl.rotate(30, 1, 0, 0);
         gl.rotate(angle, 0, 1, 0);
-
-        gl.pushMatrix();
-        gl.rotate(-90, 1, 0, 0);
         shader.draw(mesh);
-        gl.popMatrix();
     }
 
     </script>

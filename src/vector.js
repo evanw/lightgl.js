@@ -20,6 +20,7 @@ Vector.prototype.unit = function() { return this.divide(this.length()); };
 Vector.prototype.min = function() { return Math.min(Math.min(this.x, this.y), this.z); };
 Vector.prototype.max = function() { return Math.max(Math.max(this.x, this.y), this.z); };
 Vector.prototype.toAngles = function() { return { theta: Math.atan2(this.z, this.x), phi: Math.asin(this.y / this.length()) }; };
+Vector.prototype.toArray = function(n) { return [this.x, this.y, this.z].slice(0, n || 3); };
 
 // ### Static Methods
 // `Vector.random()` returns a vector with a length of 1 and a statistically
@@ -30,3 +31,4 @@ Vector.random = function() { return Vector.fromAngles(Math.random() * Math.PI * 
 Vector.min = function(a, b) { return new Vector(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z)); };
 Vector.max = function(a, b) { return new Vector(Math.max(a.x, b.x), Math.max(a.y, b.y), Math.max(a.z, b.z)); };
 Vector.lerp = function(a, b, fraction) { return a.add(b.subtract(a).multiply(fraction)); };
+Vector.fromArray = function(a) { return new Vector(a[0], a[1], a[2]); };

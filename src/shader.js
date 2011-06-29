@@ -141,12 +141,13 @@ Shader.prototype.uniforms = function(uniforms) {
     return this;
 };
 
-// ### .draw(mesh)
+// ### .draw(mesh[, mode])
 // 
 // Sets all uniform matrix attributes, binds all relevant buffers, and draws the
 // mesh geometry as indexed triangles. This method automatically creates and caches
-// vertex attribute pointers for the attributes stored in `mesh`.
-Shader.prototype.draw = function(mesh) {
+// vertex attribute pointers for the attributes stored in `mesh`. The mesh can be
+// drawn in wireframe by setting `mode` to `gl.LINES`.
+Shader.prototype.draw = function(mesh, mode) {
     this.uniforms({
         _gl_ModelViewMatrix: gl.modelviewMatrix,
         _gl_ProjectionMatrix: gl.projectionMatrix
@@ -157,27 +158,27 @@ Shader.prototype.draw = function(mesh) {
 
     // Create and enable attribute pointers as necessary.
     var vertexBuffers = mesh.vertexBuffers;
-    for (var name in vertexBuffers) {
-        var vertexBuffer = vertexBuffers[name];
-        var attribute = this.attributes[name] || gl.getAttribLocation(this.program, name.replace(/^gl_/, '_gl_'));
-        if (attribute == -1) continue;
-        this.attributes[name] = attribute;
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer.buffer);
-        gl.enableVertexAttribArray(attribute);
-        gl.vertexAttribPointer(attribute, vertexBuffer.buffer.spacing, gl.FLOAT, false, 0, 0);
+    for (var attribute in vertexBuffers) {
+        var buffer = vertexBuffers[attribute];
+        var location = this.attributes[attribute] || gl.getAttribLocation(this.program, attribute.replace(/^gl_/, '_gl_'));
+        if (location == -1) continue;
+        this.attributes[attribute] = location;
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer.buffer);
+        gl.enableVertexAttribArray(location);
+        gl.vertexAttribPointer(location, buffer.buffer.spacing, gl.FLOAT, false, 0, 0);
     }
 
     // Disable unused attribute pointers.
-    for (var name in this.attributes) {
-        if (!(name in vertexBuffers)) {
-            gl.disableVertexArray(this.attributes[name]);
+    for (var attribute in this.attributes) {
+        if (!(attribute in vertexBuffers)) {
+            gl.disableVertexArray(this.attributes[attribute]);
         }
     }
 
     // Draw the geometry.
-    var indexBuffer = mesh.indexBuffer;
+    var indexBuffer = mesh.indexBuffers[mode == gl.LINES ? 'lines' : 'triangles'];
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer.buffer);
-    gl.drawElements(gl.TRIANGLES, indexBuffer.buffer.length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(mode || gl.TRIANGLES, indexBuffer.buffer.length, gl.UNSIGNED_SHORT, 0);
 
     return this;
 };
