@@ -147,13 +147,13 @@ Mesh.prototype.computeNormals = function() {
     }
     for (var i = 0; i < this.triangles.length; i++) {
         var t = this.triangles[i];
-        var a = Vector.fromArray(this.vertices[t.a]);
-        var b = Vector.fromArray(this.vertices[t.b]);
-        var c = Vector.fromArray(this.vertices[t.c]);
+        var a = Vector.fromArray(this.vertices[t[0]]);
+        var b = Vector.fromArray(this.vertices[t[1]]);
+        var c = Vector.fromArray(this.vertices[t[2]]);
         var normal = b.subtract(a).cross(c.subtract(a)).unit();
-        this.normals[t.a] = this.normals[t.a].add(normal);
-        this.normals[t.b] = this.normals[t.b].add(normal);
-        this.normals[t.c] = this.normals[t.c].add(normal);
+        this.normals[t[0]] = this.normals[t[0]].add(normal);
+        this.normals[t[1]] = this.normals[t[1]].add(normal);
+        this.normals[t[2]] = this.normals[t[2]].add(normal);
     }
     for (var i = 0; i < this.vertices.length; i++) {
         this.normals[i] = this.normals[i].unit().toArray();

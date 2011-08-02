@@ -128,13 +128,21 @@ window.onload = function() {
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         function(callback) { setTimeout(callback, 1000 / 60); };
-    var time;
+    var time = new Date();
     function frame() {
         var now = new Date();
-        if (window.update) window.update((now - (time || now)) / 1000);
+
+        // If we're animating, render as fast as possible, otherwise sleep for
+        // a bit and check if we're animating again
+        if (gl.autoDraw) {
+            if (window.update) window.update((now - time) / 1000);
+            if (window.draw) window.draw();
+            post(frame);
+        } else {
+            setTimeout(frame, 100);
+        }
+
         time = now;
-        if (window.draw) window.draw();
-        if (gl.autoDraw) post(frame);
     }
 
     // Draw the initial frame and start the animation loop.

@@ -185,7 +185,7 @@ Shader.prototype.drawBuffers = function(vertexBuffers, indexBuffer, mode) {
     // Disable unused attribute pointers.
     for (var attribute in this.attributes) {
         if (!(attribute in vertexBuffers)) {
-            gl.disableVertexArray(this.attributes[attribute]);
+            gl.disableVertexAttribArray(this.attributes[attribute]);
         }
     }
 
