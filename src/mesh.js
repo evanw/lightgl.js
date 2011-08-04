@@ -42,20 +42,22 @@ Buffer = function(target, type) {
     this.data = [];
 };
 
-// ### .compile()
+// ### .compile(type)
 // 
 // Upload the contents of `data` to the GPU in preparation for rendering. The
 // data must be a list of lists where each inner list has the same length. For
 // example, each element of data for vertex normals would be a list of length three.
 // This will remember the data length and element length for later use by shaders.
-Buffer.prototype.compile = function() {
+// The type can be either `gl.STATIC_DRAW` or `gl.DYNAMIC_DRAW`, and defaults to
+// `gl.STATIC_DRAW`.
+Buffer.prototype.compile = function(type) {
     var data = Array.prototype.concat.apply([], this.data);
     if (data.length) {
         this.buffer = this.buffer || gl.createBuffer();
         this.buffer.length = data.length;
         this.buffer.spacing = data.length / this.data.length;
         gl.bindBuffer(this.target, this.buffer);
-        gl.bufferData(this.target, new this.type(data), gl.STATIC_DRAW);
+        gl.bufferData(this.target, new this.type(data), type || gl.STATIC_DRAW);
     }
 };
 

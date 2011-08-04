@@ -107,7 +107,9 @@ Texture.prototype.swapWith = function(other) {
 // 
 // Return a new image created from `image`, an `<img>` tag.
 Texture.fromImage = function(image, options) {
+    options = options || {};
     var texture = new Texture(image.width, image.height, options);
     gl.texImage2D(gl.TEXTURE_2D, 0, texture.format, texture.format, texture.type, image);
+    if (options.minFilter && options.minFilter != gl.NEAREST && options.minFilter != gl.LINEAR) gl.generateMipmap(gl.TEXTURE_2D);
     return texture;
 };
