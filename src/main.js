@@ -37,6 +37,112 @@ window.onload = function() {
     try { gl = gl || canvas.getContext('experimental-webgl'); } catch (e) {}
     if (!gl) throw ('WebGL not supported');
 
+    // ### Mouse Input
+    // 
+    // The interface for mouse input is also taken from Processing. Mouse state
+    // can be accessed through the `mouseX`, `mouseY`, `deltaMouseX`, `deltaMouseY`,
+    // and `mouseDragging` global variables. The four mouse callbacks are:
+    // 
+    //     function mousePressed() {
+    //         // Called when any mouse button is pressed
+    //     }
+    // 
+    //     function mouseDragged() {
+    //         // Called when the mouse moves while pressed
+    //     }
+    // 
+    //     function mouseMoved() {
+    //         // Called when the mouse moves while released
+    //     }
+    // 
+    //     function mouseReleased() {
+    //         // Called when any mouse button is released
+    //     }
+
+    window.mouseX = window.mouseY = window.deltaMouseX = window.deltaMouseY = 0;
+    window.mouseDragging = false;
+
+    var oldMouseX = 0;
+    var oldMouseY = 0;
+
+    function setMouseInfo(e) {
+        mouseX = e.pageX;
+        mouseY = e.pageY;
+        for (var obj = gl.canvas; obj; obj = obj.offsetParent) {
+            mouseX -= obj.offsetLeft;
+            mouseY -= obj.offsetTop;
+        }
+        deltaMouseX = mouseX - oldMouseX;
+        deltaMouseY = mouseY - oldMouseY;
+        oldMouseX = mouseX;
+        oldMouseY = mouseY;
+    }
+
+    document.onmousedown = function(e) {
+        setMouseInfo(e);
+        mouseDragging = true;
+        if (window.mousePressed) window.mousePressed();
+    };
+
+    document.onmousemove = function(e) {
+        setMouseInfo(e);
+        if (!mouseDragging && window.mouseMoved) window.mouseMoved();
+        else if (mouseDragging && window.mouseDragged) window.mouseDragged();
+    };
+
+    document.onmouseup = function(e) {
+        setMouseInfo(e);
+        mouseDragging = false;
+        if (window.mouseReleased) window.mouseReleased();
+    };
+
+    // ### Keyboard Input
+    // 
+    // The interface for keyboard input is also taken from Processing. Keyboard state
+    // can be accessed through the `key` and `keys` global variables. The key code from
+    // the last keyboard event is stored in `key`, which will either be a string or a
+    // numeric constant. The current boolean state of any key code can be queried using
+    // `keys[code]`. The two keyboard callbacks are:
+    // 
+    //     function keyPressed() {
+    //     }
+    // 
+    //     function keyReleased() {
+    //     }
+
+    window.key = null;
+    window.keys = {};
+
+    function mapKeyCode(code) {
+        switch (code) {
+            case 8: return 'BACKSPACE';
+            case 9: return 'TAB';
+            case 13: return 'ENTER';
+            case 16: return 'SHIFT';
+            case 17: return 'CONTROL';
+            case 18: return 'ALT';
+            case 27: return 'ESCAPE';
+            case 32: return 'SPACE';
+            case 37: return 'LEFT';
+            case 38: return 'UP';
+            case 39: return 'RIGHT';
+            case 40: return 'DOWN';
+        }
+        return code >= 65 && code <= 90 ? String.fromCharCode(code) : code;
+    }
+
+    document.onkeydown = function(e) {
+        key = mapKeyCode(e.keyCode);
+        keys[key] = true;
+        if (window.keyPressed) window.keyPressed();
+    };
+
+    document.onkeyup = function(e) {
+        key = mapKeyCode(e.keyCode);
+        keys[key] = false;
+        if (window.keyReleased) window.keyReleased();
+    };
+
     // Provide an implementation of the OpenGL matrix stack (only modelview
     // and projection matrices), as well as some useful GLU matrix functions.
     var ENUM = 0x12340000;
@@ -148,110 +254,4 @@ window.onload = function() {
     // Draw the initial frame and start the animation loop.
     if (window.setup) window.setup();
     frame();
-
-    // ### Mouse Input
-    // 
-    // The interface for mouse input is also taken from Processing. Mouse state
-    // can be accessed through the `mouseX`, `mouseY`, `deltaMouseX`, `deltaMouseY`,
-    // and `mouseDragging` global variables. The four mouse callbacks are:
-    // 
-    //     function mousePressed() {
-    //         // Called when any mouse button is pressed
-    //     }
-    // 
-    //     function mouseDragged() {
-    //         // Called when the mouse moves while pressed
-    //     }
-    // 
-    //     function mouseMoved() {
-    //         // Called when the mouse moves while released
-    //     }
-    // 
-    //     function mouseReleased() {
-    //         // Called when any mouse button is released
-    //     }
-
-    mouseX = mouseY = deltaMouseX = deltaMouseY = 0;
-    mouseDragging = false;
-
-    var oldMouseX = 0;
-    var oldMouseY = 0;
-
-    function setMouseInfo(e) {
-        mouseX = e.pageX;
-        mouseY = e.pageY;
-        for (var obj = gl.canvas; obj; obj = obj.offsetParent) {
-            mouseX -= obj.offsetLeft;
-            mouseY -= obj.offsetTop;
-        }
-        deltaMouseX = mouseX - oldMouseX;
-        deltaMouseY = mouseY - oldMouseY;
-        oldMouseX = mouseX;
-        oldMouseY = mouseY;
-    }
-
-    document.onmousedown = function(e) {
-        setMouseInfo(e);
-        mouseDragging = true;
-        if (window.mousePressed) window.mousePressed();
-    };
-
-    document.onmousemove = function(e) {
-        setMouseInfo(e);
-        if (!mouseDragging && window.mouseMoved) window.mouseMoved();
-        else if (mouseDragging && window.mouseDragged) window.mouseDragged();
-    };
-
-    document.onmouseup = function(e) {
-        setMouseInfo(e);
-        mouseDragging = false;
-        if (window.mouseReleased) window.mouseReleased();
-    };
-
-    // ### Keyboard Input
-    // 
-    // The interface for keyboard input is also taken from Processing. Keyboard state
-    // can be accessed through the `key` and `keys` global variables. The key code from
-    // the last keyboard event is stored in `key`, which will either be a string or a
-    // numeric constant. The current boolean state of any key code can be queried using
-    // `keys[code]`. The two keyboard callbacks are:
-    // 
-    //     function keyPressed() {
-    //     }
-    // 
-    //     function keyReleased() {
-    //     }
-
-    key = null;
-    keys = [];
-
-    function mapKeyCode(code) {
-        switch (code) {
-            case 8: return 'BACKSPACE';
-            case 9: return 'TAB';
-            case 13: return 'ENTER';
-            case 16: return 'SHIFT';
-            case 17: return 'CONTROL';
-            case 18: return 'ALT';
-            case 27: return 'ESCAPE';
-            case 32: return 'SPACE';
-            case 37: return 'LEFT';
-            case 38: return 'UP';
-            case 39: return 'RIGHT';
-            case 40: return 'DOWN';
-        }
-        return code >= 65 && code <= 90 ? String.fromCharCode(code) : code;
-    }
-
-    document.onkeydown = function(e) {
-        key = mapKeyCode(e.keyCode);
-        keys[key] = true;
-        if (window.keyPressed) window.keyPressed();
-    };
-
-    document.onkeyup = function(e) {
-        key = mapKeyCode(e.keyCode);
-        keys[key] = false;
-        if (window.keyReleased) window.keyReleased();
-    };
 };
