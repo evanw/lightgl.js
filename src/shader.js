@@ -46,8 +46,10 @@ Shader = function(vertexSource, fragmentSource) {
             callback(result);
         }
     }
+    // Insert the header after any extensions, since those must come first.
     function fix(header, source) {
-        source = header + source;
+        var match = /^((\s*\/\/.*\n|\s*#extension.*\n)+)[^]*$/.exec(source);
+        source = match ? match[1] + header + source.substr(match[1].length) : header + source;
         regexMap(/\bgl_\w+\b/g, header, function(result) {
             source = source.replace(new RegExp(result, 'g'), '_' + result);
         });
