@@ -50,8 +50,15 @@ Buffer = function(target, type) {
 // This will remember the data length and element length for later use by shaders.
 // The type can be either `gl.STATIC_DRAW` or `gl.DYNAMIC_DRAW`, and defaults to
 // `gl.STATIC_DRAW`.
+// 
+// This could have used `[].concat.apply([], this.data)` to flatten
+// the array but Google Chrome has a maximum number of arguments so the
+// concatenations are chunked to avoid that limit.
 Buffer.prototype.compile = function(type) {
-    var data = Array.prototype.concat.apply([], this.data);
+    var data = [];
+    for (var i = 0, chunk = 100000; i < this.data.length; i += chunk) {
+        data = Array.prototype.concat.apply(data, this.data.slice(i, i + chunk));
+    }
     if (data.length) {
         this.buffer = this.buffer || gl.createBuffer();
         this.buffer.length = data.length;
