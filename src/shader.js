@@ -58,14 +58,13 @@ Shader = function(vertexSource, fragmentSource) {
     vertexSource = fix(vertexHeader, vertexSource);
     fragmentSource = fix(fragmentHeader, fragmentSource);
 
-    // Compile and link errors are thrown as strings, which are later caught and passed
-    // to `fail()`.
+    // Compile and link errors are thrown as strings.
     function compileSource(type, source) {
         var shader = gl.createShader(type);
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
         if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            throw 'compile error: ' + gl.getShaderInfoLog(shader);
+            __error('compile error: ' + gl.getShaderInfoLog(shader));
         }
         return shader;
     }
@@ -74,15 +73,15 @@ Shader = function(vertexSource, fragmentSource) {
     gl.attachShader(this.program, compileSource(gl.FRAGMENT_SHADER, fragmentSource));
     gl.linkProgram(this.program);
     if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
-        throw 'link error: ' + gl.getProgramInfoLog(this.program);
+        __error('link error: ' + gl.getProgramInfoLog(this.program));
     }
     this.attributes = {};
 
     // Sampler uniforms need to be uploaded using `gl.uniform1i()` instead of `gl.uniform1f()`.
     // To do this automatically, we detect and remember all uniform samplers in the source code.
     var isSampler = {};
-    regexMap(/uniform\s*sampler\dD\s*(\w+)\s*;/g, vertexSource + fragmentSource, function(groups) {
-        isSampler[groups[1]] = 1;
+    regexMap(/uniform\s+sampler(1D|2D|3D|Cube)\s+(\w+)\s*;/g, vertexSource + fragmentSource, function(groups) {
+        isSampler[groups[2]] = 1;
     });
     this.isSampler = isSampler;
     this.needsMVP = (vertexSource + fragmentSource).indexOf('gl_ModelViewProjectionMatrix') != -1;
@@ -131,12 +130,12 @@ Shader.prototype.uniforms = function(uniforms) {
                     value[2], value[6], value[10], value[14],
                     value[3], value[7], value[11], value[15]
                 ])); break;
-                default: throw 'don\'t know how to load uniform "' + name + '" of length ' + value.length;
+                default: __error('don\'t know how to load uniform "' + name + '" of length ' + value.length);
             }
         } else if (isNumber(value)) {
             (this.isSampler[name] ? gl.uniform1i : gl.uniform1f).call(gl, location, value);
         } else {
-            throw 'attempted to set uniform "' + name + '" to invalid value ' + value;
+            __error('attempted to set uniform "' + name + '" to invalid value ' + value);
         }
     }
 

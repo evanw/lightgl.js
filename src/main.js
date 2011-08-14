@@ -35,7 +35,7 @@ window.onload = function() {
     window.gl = null;
     try { gl = canvas.getContext('webgl'); } catch (e) {}
     try { gl = gl || canvas.getContext('experimental-webgl'); } catch (e) {}
-    if (!gl) throw ('WebGL not supported');
+    if (!gl) __error('WebGL not supported');
 
     // ### Mouse Input
     // 
@@ -164,7 +164,7 @@ window.onload = function() {
             stack = projectionStack;
             break;
         default:
-            throw 'invalid matrix mode ' + mode;
+            __error('invalid matrix mode ' + mode);
         }
     };
     gl.loadIdentity = function() {
@@ -255,3 +255,16 @@ window.onload = function() {
     if (window.setup) window.setup();
     frame();
 };
+
+// ### Error handling
+// If you want to handle WebGL errors, define a function called handleError():
+// 
+//     function handleError(text) {
+//         alert('WebGL error occurred: ' + text);
+//     }
+// 
+// The error is always thrown afterwards to make sure the current function stops.
+function __error(text) {
+  if (window.handleError) window.handleError(text);
+  throw text;
+}
