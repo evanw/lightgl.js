@@ -119,8 +119,6 @@ window.onload = function() {
             case 9: return 'TAB';
             case 13: return 'ENTER';
             case 16: return 'SHIFT';
-            case 17: return 'CONTROL';
-            case 18: return 'ALT';
             case 27: return 'ESCAPE';
             case 32: return 'SPACE';
             case 37: return 'LEFT';
@@ -132,15 +130,19 @@ window.onload = function() {
     }
 
     document.onkeydown = function(e) {
-        key = mapKeyCode(e.keyCode);
-        keys[key] = true;
-        if (window.keyPressed) window.keyPressed();
+        if (!e.altKey && !e.ctrlKey && !e.metaKey) {
+            key = mapKeyCode(e.keyCode);
+            keys[key] = true;
+            if (window.keyPressed) window.keyPressed();
+        }
     };
 
     document.onkeyup = function(e) {
-        key = mapKeyCode(e.keyCode);
-        keys[key] = false;
-        if (window.keyReleased) window.keyReleased();
+        if (!e.altKey && !e.ctrlKey && !e.metaKey) {
+            key = mapKeyCode(e.keyCode);
+            keys[key] = false;
+            if (window.keyReleased) window.keyReleased();
+        }
     };
 
     // Provide an implementation of the OpenGL matrix stack (only modelview
