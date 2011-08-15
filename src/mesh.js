@@ -56,7 +56,7 @@ Buffer = function(target, type) {
 // concatenations are chunked to avoid that limit.
 Buffer.prototype.compile = function(type) {
     var data = [];
-    for (var i = 0, chunk = 100000; i < this.data.length; i += chunk) {
+    for (var i = 0, chunk = 10000; i < this.data.length; i += chunk) {
         data = Array.prototype.concat.apply(data, this.data.slice(i, i + chunk));
     }
     if (data.length) {
