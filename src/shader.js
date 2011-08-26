@@ -151,7 +151,7 @@ Shader.prototype.uniforms = function(uniforms) {
 Shader.prototype.draw = function(mesh, mode) {
     this.drawBuffers(mesh.vertexBuffers,
         mesh.indexBuffers[mode == gl.LINES ? 'lines' : 'triangles'],
-        mode || gl.TRIANGLES);
+        arguments.length < 2 ? gl.TRIANGLES : mode);
 };
 
 // ### .drawBuffers(vertexBuffers, indexBuffer, mode)
