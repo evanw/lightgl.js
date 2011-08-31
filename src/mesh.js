@@ -85,8 +85,8 @@ Mesh = function(options) {
     this.addVertexBuffer('vertices', 'gl_Vertex');
     if (!('coords' in options) || options.coords) this.addVertexBuffer('coords', 'gl_TexCoord');
     if (!('normals' in options) || options.normals) this.addVertexBuffer('normals', 'gl_Normal');
-    this.addIndexBuffer('triangles');
-    this.addIndexBuffer('lines');
+    if (!('triangles' in options) || options.triangles) this.addIndexBuffer('triangles');
+    if (options.lines) this.addIndexBuffer('lines');
 };
 
 // ### .addVertexBuffer(name, attribute)

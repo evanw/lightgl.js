@@ -13,6 +13,7 @@ Vector.prototype.add = function(v) { var b = v instanceof Vector; return new Vec
 Vector.prototype.subtract = function(v) { var b = v instanceof Vector; return new Vector(this.x - (b ? v.x : v), this.y - (b ? v.y : v), this.z - (b ? v.z : v)); };
 Vector.prototype.multiply = function(v) { var b = v instanceof Vector; return new Vector(this.x * (b ? v.x : v), this.y * (b ? v.y : v), this.z * (b ? v.z : v)); };
 Vector.prototype.divide = function(v) { var b = v instanceof Vector; return new Vector(this.x / (b ? v.x : v), this.y / (b ? v.y : v), this.z / (b ? v.z : v)); };
+Vector.prototype.equals = function(v) { return this.x == v.x && this.y == v.y && this.z == v.z; };
 Vector.prototype.dot = function(v) { return this.x * v.x + this.y * v.y + this.z * v.z; };
 Vector.prototype.cross = function(v) { return new Vector(this.y * v.z - this.z * v.y, this.z * v.x - this.x * v.z, this.x * v.y - this.y * v.x); };
 Vector.prototype.length = function() { return Math.sqrt(this.dot(this)); };

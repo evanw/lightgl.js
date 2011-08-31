@@ -41,7 +41,8 @@ window.onload = function() {
     // 
     // The interface for mouse input is also taken from Processing. Mouse state
     // can be accessed through the `mouseX`, `mouseY`, `deltaMouseX`, `deltaMouseY`,
-    // and `mouseDragging` global variables. The four mouse callbacks are:
+    // `mouseDragging`, `mouseButton`, and `mouseButtons` global variables. The
+    // four mouse callbacks are:
     // 
     //     function mousePressed() {
     //         // Called when any mouse button is pressed
@@ -59,7 +60,12 @@ window.onload = function() {
     //         // Called when any mouse button is released
     //     }
 
+    window.LEFT_BUTTON = 1;
+    window.MIDDLE_BUTTON = 2;
+    window.RIGHT_BUTTON = 4;
+
     window.mouseX = window.mouseY = window.deltaMouseX = window.deltaMouseY = 0;
+    window.mouseButton = window.mouseButtons = 0;
     window.mouseDragging = false;
 
     var oldMouseX = 0;
@@ -76,11 +82,14 @@ window.onload = function() {
         deltaMouseY = mouseY - oldMouseY;
         oldMouseX = mouseX;
         oldMouseY = mouseY;
+        e.preventDefault();
     }
 
-    document.onmousedown = function(e) {
+    gl.canvas.onmousedown = function(e) {
         setMouseInfo(e);
         mouseDragging = true;
+        mouseButton = 1 << (e.which - 1);
+        mouseButtons |= mouseButton;
         if (window.mousePressed) window.mousePressed();
     };
 
@@ -93,7 +102,19 @@ window.onload = function() {
     document.onmouseup = function(e) {
         setMouseInfo(e);
         mouseDragging = false;
+        mouseButton = 1 << (e.which - 1);
+        mouseButtons &= ~mouseButton;
         if (window.mouseReleased) window.mouseReleased();
+    };
+
+    gl.canvas.oncontextmenu = function(e) {
+        e.preventDefault();
+    };
+
+    window.onblur = function() {
+        mouseDragging = false;
+        mouseButtons = 0;
+        keys = {};
     };
 
     // ### Keyboard Input
