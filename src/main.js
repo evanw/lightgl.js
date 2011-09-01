@@ -166,6 +166,47 @@ window.onload = function() {
         }
     };
 
+    // Provide an easy way to get a fullscreen app running, including an
+    // automatic 3D perspective projection matrix by default. This should be
+    // called once in setup().
+    // 
+    // Just fullscreen, no camera:
+    // 
+    //     gl.fullscreen({ camera: false });
+    // 
+    // Adjusting field of view, near plane distance, and far plane distance:
+    // 
+    //     gl.fullscreen({ fov: 45, near: 0.1, far: 1000 });
+    // 
+    // Adding padding from the edge of the window:
+    // 
+    //     gl.fullscreen({ paddingLeft: 250, paddingBottom: 60 });
+    gl.fullscreen = function(options) {
+        options = options || {};
+        var top = options.paddingTop || 0;
+        var left = options.paddingLeft || 0;
+        var right = options.paddingRight || 0;
+        var bottom = options.paddingBottom || 0;
+        document.body.appendChild(gl.canvas);
+        gl.canvas.style.position = 'absolute';
+        gl.canvas.style.left = left + 'px';
+        gl.canvas.style.top = top + 'px';
+        window.onresize = function() {
+            gl.canvas.width = window.innerWidth - left - right;
+            gl.canvas.height = window.innerHeight - top - bottom;
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+            if (options.camera || !('camera' in options)) {
+                gl.matrixMode(gl.PROJECTION);
+                gl.loadIdentity();
+                gl.perspective(options.fov || 45, gl.canvas.width / gl.canvas.height,
+                    options.near || 0.1, options.far || 1000);
+                gl.matrixMode(gl.MODELVIEW);
+            }
+            if (setupCalled) draw();
+        };
+        window.onresize();
+    };
+
     // Provide an implementation of the OpenGL matrix stack (only modelview
     // and projection matrices), as well as some useful GLU matrix functions.
     var ENUM = 0x12340000;
@@ -274,8 +315,13 @@ window.onload = function() {
         time = now;
     }
 
-    // Draw the initial frame and start the animation loop.
+    // Draw the initial frame and start the animation loop. The setupCalled
+    // flag is used so methods called within `setup()` don't run user callbacks
+    // until after `setup()` has finished, otherwise the user's data may not be
+    // initialized correctly.
+    var setupCalled = false;
     if (window.setup) window.setup();
+    setupCalled = true;
     frame();
 };
 
