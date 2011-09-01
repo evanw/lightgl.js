@@ -309,14 +309,17 @@ window.onload = function() {
     // 
     var immediateMode = {
         mesh: new Mesh({ normals: false, coords: false, triangles: false }),
-        mode: null,
+        mode: -1,
         color: new Vector(1, 1, 1),
+        pointSize: 1,
         shader: new Shader('\
+            uniform float pointSize;\
             attribute vec3 color;\
             varying vec3 c;\
             void main() {\
                 c = color;\
                 gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex, 1.0);\
+                gl_PointSize = pointSize;\
             }\
         ', '\
             varying vec3 c;\
@@ -326,8 +329,11 @@ window.onload = function() {
         ')
     };
     immediateMode.mesh.addVertexBuffer('colors', 'color');
+    gl.pointSize = function(pointSize) {
+        immediateMode.pointSize = pointSize;
+    };
     gl.begin = function(mode) {
-        if (immediateMode.mode) throw 'mismatched gl.begin() and gl.end() calls';
+        if (immediateMode.mode != -1) throw 'mismatched gl.begin() and gl.end() calls';
         immediateMode.mode = mode;
         immediateMode.mesh.vertices = [];
         immediateMode.mesh.colors = [];
@@ -340,10 +346,12 @@ window.onload = function() {
         immediateMode.mesh.vertices.push(arguments.length == 1 ? x.toArray() : [x, y, z]);
     };
     gl.end = function() {
-        if (!immediateMode.mode) throw 'mismatched gl.begin() and gl.end() calls';
+        if (immediateMode.mode == -1) throw 'mismatched gl.begin() and gl.end() calls';
         immediateMode.mesh.compile();
-        immediateMode.shader.draw(immediateMode.mesh, immediateMode.mode);
-        immediateMode.mode = null;
+        immediateMode.shader.uniforms({
+            pointSize: immediateMode.pointSize
+        }).draw(immediateMode.mesh, immediateMode.mode);
+        immediateMode.mode = -1;
     };
 
     // Set up a better default state, users can still change it if they want
