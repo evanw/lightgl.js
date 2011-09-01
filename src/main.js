@@ -166,6 +166,8 @@ window.onload = function() {
         }
     };
 
+    // ### Fullscreen
+    // 
     // Provide an easy way to get a fullscreen app running, including an
     // automatic 3D perspective projection matrix by default. This should be
     // called once in setup().
@@ -181,6 +183,7 @@ window.onload = function() {
     // Adding padding from the edge of the window:
     // 
     //     gl.fullscreen({ paddingLeft: 250, paddingBottom: 60 });
+    // 
     gl.fullscreen = function(options) {
         options = options || {};
         var top = options.paddingTop || 0;
@@ -207,8 +210,11 @@ window.onload = function() {
         window.onresize();
     };
 
+    // ### Matrix stack
+    // 
     // Provide an implementation of the OpenGL matrix stack (only modelview
     // and projection matrices), as well as some useful GLU matrix functions.
+    // 
     var ENUM = 0x12340000;
     gl.MODELVIEW = ENUM | 1;
     gl.PROJECTION = ENUM | 2;
@@ -290,7 +296,59 @@ window.onload = function() {
         return projection.multiply(modelview).inverse().transformPoint(point);
     };
     gl.matrixMode(gl.MODELVIEW);
-    gl.autoDraw = true;
+
+    // ### Immediate mode
+    // 
+    // Provide an implementation of OpenGL's deprecated immediate mode. This is
+    // depricated for a reason: constantly re-specifying the geometry is a bad
+    // idea for performance. You should use a `Mesh` instead, which specifies
+    // the geometry once and caches it on the graphics card. Still, nothing
+    // beats a quick `gl.begin(gl.POINTS); gl.vertex(1, 2, 3); gl.end();` for
+    // debugging. This intentionally doesn't implement texture coordinates or
+    // normals because it's only meant for quick debugging tasks.
+    // 
+    var immediateMode = {
+        mesh: new Mesh({ normals: false, coords: false, triangles: false }),
+        mode: null,
+        color: new Vector(1, 1, 1),
+        shader: new Shader('\
+            attribute vec3 color;\
+            varying vec3 c;\
+            void main() {\
+                c = color;\
+                gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex, 1.0);\
+            }\
+        ', '\
+            varying vec3 c;\
+            void main() {\
+                gl_FragColor = vec4(c, 1.0);\
+            }\
+        ')
+    };
+    immediateMode.mesh.addVertexBuffer('colors', 'color');
+    gl.begin = function(mode) {
+        if (immediateMode.mode) throw 'mismatched gl.begin() and gl.end() calls';
+        immediateMode.mode = mode;
+        immediateMode.mesh.vertices = [];
+        immediateMode.mesh.colors = [];
+    };
+    gl.color = function(r, g, b) {
+        immediateMode.color = (arguments.length == 1) ? r.toArray() : [r, g, b];
+    };
+    gl.vertex = function(x, y, z) {
+        immediateMode.mesh.colors.push(immediateMode.color);
+        immediateMode.mesh.vertices.push(arguments.length == 1 ? x.toArray() : [x, y, z]);
+    };
+    gl.end = function() {
+        if (!immediateMode.mode) throw 'mismatched gl.begin() and gl.end() calls';
+        immediateMode.mesh.compile();
+        immediateMode.shader.draw(immediateMode.mesh, immediateMode.mode);
+        immediateMode.mode = null;
+    };
+
+    // Set up a better default state, users can still change it if they want
+    gl.clearColor(0, 0, 0, 1);
+    gl.enable(gl.DEPTH_TEST);
 
     // Set up the animation loop. If your application doesn't need continuous
     // redrawing, set `gl.autoDraw = false` in your `setup()` function.
@@ -314,6 +372,7 @@ window.onload = function() {
 
         time = now;
     }
+    gl.autoDraw = true;
 
     // Draw the initial frame and start the animation loop. The setupCalled
     // flag is used so methods called within `setup()` don't run user callbacks
