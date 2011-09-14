@@ -51,3 +51,7 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
     }
 
     </script>
+
+## Documentation
+
+Documentation is available at http://evanw.github.com/lightgl.js/docs/main.html.
