@@ -42,7 +42,7 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
     }
 
     function draw() {
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.loadIdentity();
         gl.translate(0, 0, -5);
         gl.rotate(30, 1, 0, 0);
