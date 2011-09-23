@@ -14,20 +14,20 @@ Vector.prototype.negative = function() {
     return new Vector(-this.x, -this.y, -this.z);
 };
 Vector.prototype.add = function(v) {
-    if (b instanceof Vector) return new Vector(a.x + b.x, a.y + b.y, a.z + b.z);
-    else return new Vector(a.x + b, a.y + b, a.z + b);
+    if (v instanceof Vector) return new Vector(this.x + v.x, this.y + v.y, this.z + v.z);
+    else return new Vector(this.x + v, this.y + v, this.z + v);
 };
 Vector.prototype.subtract = function(v) {
-    if (b instanceof Vector) return new Vector(a.x - b.x, a.y - b.y, a.z - b.z);
-    else return new Vector(a.x - b, a.y - b, a.z - b);
+    if (v instanceof Vector) return new Vector(this.x - v.x, this.y - v.y, this.z - v.z);
+    else return new Vector(this.x - v, this.y - v, this.z - v);
 };
 Vector.prototype.multiply = function(v) {
-    if (b instanceof Vector) return new Vector(a.x * b.x, a.y * b.y, a.z * b.z);
-    else return new Vector(a.x * b, a.y * b, a.z * b);
+    if (v instanceof Vector) return new Vector(this.x * v.x, this.y * v.y, this.z * v.z);
+    else return new Vector(this.x * v, this.y * v, this.z * v);
 };
 Vector.prototype.divide = function(v) {
-    if (b instanceof Vector) return new Vector(a.x / b.x, a.y / b.y, a.z / b.z);
-    else return new Vector(a.x / b, a.y / b, a.z / b);
+    if (v instanceof Vector) return new Vector(this.x / v.x, this.y / v.y, this.z / v.z);
+    else return new Vector(this.x / v, this.y / v, this.z / v);
 };
 Vector.prototype.equals = function(v) {
     return this.x == v.x && this.y == v.y && this.z == v.z;

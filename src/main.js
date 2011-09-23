@@ -273,7 +273,7 @@ window.onload = function() {
         gl.multMatrix(Matrix.lookAt(ex, ey, ez, cx, cy, cz, ux, uy, uz, tempMatrix));
     };
     gl.pushMatrix = function() {
-        stack.push(gl[matrix].m.slice());
+        stack.push(Array.prototype.slice.call(gl[matrix].m));
     };
     gl.popMatrix = function() {
         gl[matrix].m = stack.pop();
