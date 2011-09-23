@@ -88,7 +88,8 @@ Shader = function(vertexSource, fragmentSource) {
 };
 
 function isArray(obj) {
-    return Object.prototype.toString.call(obj) == '[object Array]';
+    var str = Object.prototype.toString.call(obj);
+    return str == '[object Array]' || str == '[object Float32Array]';
 }
 
 function isNumber(obj) {

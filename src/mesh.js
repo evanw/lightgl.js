@@ -183,6 +183,7 @@ Mesh.prototype.computeWireframe = function() {
             indexer.add([Math.min(a, b), Math.max(a, b)]);
         }
     }
+    if (!this.lines) this.addIndexBuffer('lines');
     this.lines = indexer.unique;
     this.compile();
     return this;

@@ -218,6 +218,8 @@ window.onload = function() {
     var ENUM = 0x12340000;
     gl.MODELVIEW = ENUM | 1;
     gl.PROJECTION = ENUM | 2;
+    var tempMatrix = new Matrix();
+    var resultMatrix = new Matrix();
     gl.modelviewMatrix = new Matrix();
     gl.projectionMatrix = new Matrix();
     var modelviewStack = [];
@@ -238,34 +240,37 @@ window.onload = function() {
         }
     };
     gl.loadIdentity = function() {
-        gl[matrix].m = new Matrix().m;
+        Matrix.identity(gl[matrix]);
     };
     gl.loadMatrix = function(m) {
-        gl[matrix].m = m.m.slice();
+        var from = m.m, to = gl[matrix].m;
+        for (var i = 0; i < 16; i++) {
+            to[i] = from[i];
+        }
     };
     gl.multMatrix = function(m) {
-        gl[matrix].m = gl[matrix].multiply(m).m;
+        gl.loadMatrix(Matrix.multiply(gl[matrix], m, resultMatrix));
     };
     gl.perspective = function(fov, aspect, near, far) {
-        gl.multMatrix(Matrix.perspective(fov, aspect, near, far));
+        gl.multMatrix(Matrix.perspective(fov, aspect, near, far, tempMatrix));
     };
     gl.frustum = function(l, r, b, t, n, f) {
-        gl.multMatrix(Matrix.frustum(l, r, b, t, n, f));
+        gl.multMatrix(Matrix.frustum(l, r, b, t, n, f, tempMatrix));
     };
     gl.ortho = function(l, r, b, t, n, f) {
-        gl.multMatrix(Matrix.ortho(l, r, b, t, n, f));
+        gl.multMatrix(Matrix.ortho(l, r, b, t, n, f, tempMatrix));
     };
     gl.scale = function(x, y, z) {
-        gl.multMatrix(Matrix.scale(x, y, z));
+        gl.multMatrix(Matrix.scale(x, y, z, tempMatrix));
     };
     gl.translate = function(x, y, z) {
-        gl.multMatrix(Matrix.translate(x, y, z));
+        gl.multMatrix(Matrix.translate(x, y, z, tempMatrix));
     };
     gl.rotate = function(a, x, y, z) {
-        gl.multMatrix(Matrix.rotate(a, x, y, z));
+        gl.multMatrix(Matrix.rotate(a, x, y, z, tempMatrix));
     };
     gl.lookAt = function(ex, ey, ez, cx, cy, cz, ux, uy, uz) {
-        gl.multMatrix(Matrix.lookAt(ex, ey, ez, cx, cy, cz, ux, uy, uz));
+        gl.multMatrix(Matrix.lookAt(ex, ey, ez, cx, cy, cz, ux, uy, uz, tempMatrix));
     };
     gl.pushMatrix = function() {
         stack.push(gl[matrix].m.slice());
@@ -293,7 +298,7 @@ window.onload = function() {
             (winY - viewport[1]) / viewport[3] * 2 - 1,
             winZ * 2 - 1
         );
-        return projection.multiply(modelview).inverse().transformPoint(point);
+        return Matrix.inverse(Matrix.multiply(projection, modelview, tempMatrix), resultMatrix).transformPoint(point);
     };
     gl.matrixMode(gl.MODELVIEW);
 
@@ -401,6 +406,6 @@ window.onload = function() {
 // 
 // The error is always thrown afterwards to make sure the current function stops.
 function __error(text) {
-  if (window.handleError) window.handleError(text);
-  throw text;
+    if (window.handleError) window.handleError(text);
+    throw text;
 }
