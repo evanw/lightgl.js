@@ -103,7 +103,7 @@ Texture.prototype.swapWith = function(other) {
     temp = other.height; other.height = this.height; this.height = temp;
 };
 
-// ### .fromImage(image[, options])
+// ### Texture.fromImage(image[, options])
 // 
 // Return a new image created from `image`, an `<img>` tag.
 Texture.fromImage = function(image, options) {
@@ -111,5 +111,27 @@ Texture.fromImage = function(image, options) {
     var texture = new Texture(image.width, image.height, options);
     gl.texImage2D(gl.TEXTURE_2D, 0, texture.format, texture.format, texture.type, image);
     if (options.minFilter && options.minFilter != gl.NEAREST && options.minFilter != gl.LINEAR) gl.generateMipmap(gl.TEXTURE_2D);
+    return texture;
+};
+
+// ### Texture.fromURL(url[, options])
+// 
+// Returns a checkerboard texture that will switch to the correct texture when
+// it loads.
+Texture.fromURL = function(url, options) {
+    var c = document.createElement('canvas').getContext('2d');
+    c.canvas.width = c.canvas.height = 128;
+    for (var y = 0; y < c.canvas.height; y += 16) {
+        for (var x = 0; x < c.canvas.width; x += 16) {
+            c.fillStyle = (x ^ y) & 16 ? '#FFF' : '#DDD';
+            c.fillRect(x, y, 16, 16);
+        }
+    }
+    var texture = Texture.fromImage(c.canvas, options);
+    var image = new Image();
+    image.onload = function() {
+        Texture.fromImage(image, options).swapWith(texture);
+    };
+    image.src = url;
     return texture;
 };
