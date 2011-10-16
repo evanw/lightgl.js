@@ -116,7 +116,7 @@ Matrix.transpose = function(matrix, result) {
     var m = matrix.m, r = result.m;
     r[0] = m[0]; r[1] = m[4]; r[2] = m[8]; r[3] = m[12];
     r[4] = m[1]; r[5] = m[5]; r[6] = m[9]; r[7] = m[13];
-    r[8] = m[2]; r[9] = m[6]; r[10] = m[10]; r[10] = m[14];
+    r[8] = m[2]; r[9] = m[6]; r[10] = m[10]; r[11] = m[14];
     r[12] = m[3]; r[13] = m[7]; r[14] = m[11]; r[15] = m[15];
     return result;
 };
