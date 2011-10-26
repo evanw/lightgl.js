@@ -18,7 +18,7 @@ function setup() {
     gl.enable(gl.DEPTH_TEST);
     mesh = Mesh.load(cessna);
     boundingSphere = mesh.getBoundingSphere();
-    plane = Mesh.plane().transform(Matrix.scale(300, 300, 300));
+    plane = Mesh.plane(1, 1, { normals: true }).transform(Matrix.scale(300, 300, 300));
     depthMap = new Texture(1024, 1024, { format: gl.RGB });
     depthShader = new Shader('\
         varying vec4 pos;\
