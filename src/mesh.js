@@ -72,19 +72,22 @@ Buffer.prototype.compile = function(type) {
 // 
 // Represents a collection of vertex buffers and index buffers. Each vertex
 // buffer maps to one attribute in GLSL and has a corresponding property set
-// on the Mesh instance. There are three vertex buffers by default: `vertices`
-// maps to `gl_Vertex`, `coords` maps to `gl_TexCoord`, and `normals` maps to
-// `gl_Normal`. The `coords` and `normals` vertex buffers can be disabled by
-// setting the corresponding options to false. There are two index buffers,
-// `triangles` and `lines`, which are used for rendering `gl.TRIANGLES` and
-// `gl.LINES`, respectively.
+// on the Mesh instance. There is one vertex buffer by default: `vertices`,
+// which maps to `gl_Vertex`. The `coords`, `normals`, and `colors` vertex
+// buffers map to `gl_TexCoord`, `gl_Normal`, and `gl_Color` respectively,
+// and can be enabled by setting the corresponding options to true. There are
+// two index buffers, `triangles` and `lines`, which are used for rendering
+// `gl.TRIANGLES` and `gl.LINES`, respectively. Only `triangles` is enabled by
+// default, although `computeWireframe()` will add a normal buffer if it wasn't
+// initially enabled.
 Mesh = function(options) {
     options = options || {};
     this.vertexBuffers = {};
     this.indexBuffers = {};
     this.addVertexBuffer('vertices', 'gl_Vertex');
-    if (!('coords' in options) || options.coords) this.addVertexBuffer('coords', 'gl_TexCoord');
-    if (!('normals' in options) || options.normals) this.addVertexBuffer('normals', 'gl_Normal');
+    if (options.coords) this.addVertexBuffer('coords', 'gl_TexCoord');
+    if (options.normals) this.addVertexBuffer('normals', 'gl_Normal');
+    if (options.color) this.addVertexBuffer('color', 'gl_Color');
     if (!('triangles' in options) || options.triangles) this.addIndexBuffer('triangles');
     if (options.lines) this.addIndexBuffer('lines');
 };

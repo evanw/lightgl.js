@@ -34,6 +34,7 @@ Shader = function(vertexSource, fragmentSource) {
         attribute vec3 gl_Vertex;\
         attribute vec2 gl_TexCoord;\
         attribute vec3 gl_Normal;\
+        attribute vec3 gl_Color;\
     ' + header;
     var fragmentHeader = '\
         precision highp float;\
