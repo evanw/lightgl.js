@@ -179,7 +179,7 @@ Shader.prototype.drawBuffers = function(vertexBuffers, indexBuffer, mode) {
         var buffer = vertexBuffers[attribute];
         var location = this.attributes[attribute] ||
             gl.getAttribLocation(this.program, attribute.replace(/^gl_/, '_gl_'));
-        if (location == -1) continue;
+        if (location == -1 || !buffer.buffer) continue;
         this.attributes[attribute] = location;
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer.buffer);
         gl.enableVertexAttribArray(location);
@@ -195,11 +195,13 @@ Shader.prototype.drawBuffers = function(vertexBuffers, indexBuffer, mode) {
     }
 
     // Draw the geometry.
-    if (indexBuffer) {
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer.buffer);
-        gl.drawElements(mode, indexBuffer.buffer.length, gl.UNSIGNED_SHORT, 0);
-    } else {
-        gl.drawArrays(mode, 0, length);
+    if (length) {
+        if (indexBuffer) {
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer.buffer);
+            gl.drawElements(mode, indexBuffer.buffer.length, gl.UNSIGNED_SHORT, 0);
+        } else {
+            gl.drawArrays(mode, 0, length);
+        }
     }
 
     return this;
