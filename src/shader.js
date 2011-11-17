@@ -195,7 +195,7 @@ Shader.prototype.drawBuffers = function(vertexBuffers, indexBuffer, mode) {
     }
 
     // Draw the geometry.
-    if (length) {
+    if (length && (!indexBuffer || indexBuffer.buffer)) {
         if (indexBuffer) {
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer.buffer);
             gl.drawElements(mode, indexBuffer.buffer.length, gl.UNSIGNED_SHORT, 0);
