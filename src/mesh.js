@@ -59,13 +59,11 @@ Buffer.prototype.compile = function(type) {
     for (var i = 0, chunk = 10000; i < this.data.length; i += chunk) {
         data = Array.prototype.concat.apply(data, this.data.slice(i, i + chunk));
     }
-    if (data.length) {
-        this.buffer = this.buffer || gl.createBuffer();
-        this.buffer.length = data.length;
-        this.buffer.spacing = data.length / this.data.length;
-        gl.bindBuffer(this.target, this.buffer);
-        gl.bufferData(this.target, new this.type(data), type || gl.STATIC_DRAW);
-    }
+    this.buffer = this.buffer || gl.createBuffer();
+    this.buffer.length = data.length;
+    this.buffer.spacing = data.length / this.data.length;
+    gl.bindBuffer(this.target, this.buffer);
+    gl.bufferData(this.target, new this.type(data), type || gl.STATIC_DRAW);
 };
 
 // ### new Mesh([options])

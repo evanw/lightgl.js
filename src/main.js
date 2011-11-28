@@ -319,17 +319,17 @@ window.onload = function() {
         pointSize: 1,
         shader: new Shader('\
             uniform float pointSize;\
-            attribute vec3 color;\
-            varying vec3 c;\
+            attribute vec4 color;\
+            varying vec4 c;\
             void main() {\
                 c = color;\
                 gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex, 1.0);\
                 gl_PointSize = pointSize;\
             }\
         ', '\
-            varying vec3 c;\
+            varying vec4 c;\
             void main() {\
-                gl_FragColor = vec4(c, 1.0);\
+                gl_FragColor = c;\
             }\
         ')
     };
@@ -343,8 +343,8 @@ window.onload = function() {
         immediateMode.mesh.vertices = [];
         immediateMode.mesh.colors = [];
     };
-    gl.color = function(r, g, b) {
-        immediateMode.color = (arguments.length == 1) ? r.toArray() : [r, g, b];
+    gl.color = function(r, g, b, a) {
+        immediateMode.color = (arguments.length == 1) ? r.toArray().concat(1) : [r, g, b, a || 1];
     };
     gl.vertex = function(x, y, z) {
         immediateMode.mesh.colors.push(immediateMode.color);
