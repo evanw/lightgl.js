@@ -303,17 +303,17 @@ normals because it's only meant for quick debugging tasks.</p>             </td>
         <span class="nx">pointSize</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="nx">shader</span><span class="o">:</span> <span class="k">new</span> <span class="nx">Shader</span><span class="p">(</span><span class="s1">&#39;\</span>
 <span class="s1">            uniform float pointSize;\</span>
-<span class="s1">            attribute vec3 color;\</span>
-<span class="s1">            varying vec3 c;\</span>
+<span class="s1">            attribute vec4 color;\</span>
+<span class="s1">            varying vec4 c;\</span>
 <span class="s1">            void main() {\</span>
 <span class="s1">                c = color;\</span>
 <span class="s1">                gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex, 1.0);\</span>
 <span class="s1">                gl_PointSize = pointSize;\</span>
 <span class="s1">            }\</span>
 <span class="s1">        &#39;</span><span class="p">,</span> <span class="s1">&#39;\</span>
-<span class="s1">            varying vec3 c;\</span>
+<span class="s1">            varying vec4 c;\</span>
 <span class="s1">            void main() {\</span>
-<span class="s1">                gl_FragColor = vec4(c, 1.0);\</span>
+<span class="s1">                gl_FragColor = c;\</span>
 <span class="s1">            }\</span>
 <span class="s1">        &#39;</span><span class="p">)</span>
     <span class="p">};</span>
@@ -327,8 +327,8 @@ normals because it's only meant for quick debugging tasks.</p>             </td>
         <span class="nx">immediateMode</span><span class="p">.</span><span class="nx">mesh</span><span class="p">.</span><span class="nx">vertices</span> <span class="o">=</span> <span class="p">[];</span>
         <span class="nx">immediateMode</span><span class="p">.</span><span class="nx">mesh</span><span class="p">.</span><span class="nx">colors</span> <span class="o">=</span> <span class="p">[];</span>
     <span class="p">};</span>
-    <span class="nx">gl</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span> <span class="nx">g</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">immediateMode</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">?</span> <span class="nx">r</span><span class="p">.</span><span class="nx">toArray</span><span class="p">()</span> <span class="o">:</span> <span class="p">[</span><span class="nx">r</span><span class="p">,</span> <span class="nx">g</span><span class="p">,</span> <span class="nx">b</span><span class="p">];</span>
+    <span class="nx">gl</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">r</span><span class="p">,</span> <span class="nx">g</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">immediateMode</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">?</span> <span class="nx">r</span><span class="p">.</span><span class="nx">toArray</span><span class="p">().</span><span class="nx">concat</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">:</span> <span class="p">[</span><span class="nx">r</span><span class="p">,</span> <span class="nx">g</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">a</span> <span class="o">||</span> <span class="mi">1</span><span class="p">];</span>
     <span class="p">};</span>
     <span class="nx">gl</span><span class="p">.</span><span class="nx">vertex</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">immediateMode</span><span class="p">.</span><span class="nx">mesh</span><span class="p">.</span><span class="nx">colors</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">immediateMode</span><span class="p">.</span><span class="nx">color</span><span class="p">);</span>
