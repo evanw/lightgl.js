@@ -33,8 +33,8 @@ window.onload = function() {
     canvas.width = 800;
     canvas.height = 600;
     window.gl = null;
-    try { gl = canvas.getContext('webgl'); } catch (e) {}
-    try { gl = gl || canvas.getContext('experimental-webgl'); } catch (e) {}
+    try { gl = canvas.getContext('webgl', { alpha: false }); } catch (e) {}
+    try { gl = gl || canvas.getContext('experimental-webgl', { alpha: false }); } catch (e) {}
     if (!gl) __error('WebGL not supported');
 
     // ### Mouse Input
