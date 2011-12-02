@@ -49,3 +49,14 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
 ## Documentation
 
 Documentation is available at http://evanw.github.com/lightgl.js/docs/main.html.
+
+## Examples
+
+Available examples:
+
+* [Simple rotating cube](http://evanw.github.com/lightgl.js/tests/readme.html)
+* [Multitexturing](http://evanw.github.com/lightgl.js/tests/multitexture.html)
+* [First person camera](http://evanw.github.com/lightgl.js/tests/camera.html)
+* [Scene manipulation](http://evanw.github.com/lightgl.js/tests/scenemanip.html)
+* [Rendering to a texture](http://evanw.github.com/lightgl.js/tests/rtt.html)
+* [Shadow map from a point light](http://evanw.github.com/lightgl.js/tests/shadowmap.html)
