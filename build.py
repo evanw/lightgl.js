@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+module = 'GL'
 input_path = 'src/'
 output_path = 'lightgl.js'
 
@@ -34,7 +35,7 @@ def compress_glsl(text):
     return text
 
 def build():
-    data = '(function() {\n\n%s\n})();\n' % compile(sources())
+    data = 'var %s = (function() {\n\n%s\nreturn %s;\n})();\n' % (module, compile(sources()), module)
     if 'release' in sys.argv:
         f1, temp1_path = tempfile.mkstemp()
         f2, temp2_path = tempfile.mkstemp()

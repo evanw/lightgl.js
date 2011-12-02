@@ -12,45 +12,39 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
 ## Sample code
 
     <script src="lightgl.js"></script>
-    <script>
+    <body><script>
 
-    var mesh;
-    var shader;
     var angle = 0;
+    var gl = GL.create();
+    var mesh = GL.Mesh.cube();
+    var shader = new GL.Shader('\
+      void main() {\
+        gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\
+      }\
+    ', '\
+      void main() {\
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\
+      }\
+    ');
 
-    function setup() {
-        document.body.appendChild(gl.canvas);
-        gl.clearColor(0, 0, 0, 1);
-        gl.matrixMode(gl.PROJECTION);
-        gl.loadIdentity();
-        gl.perspective(45, gl.canvas.width / gl.canvas.height, 0.01, 100);
-        gl.matrixMode(gl.MODELVIEW);
-        mesh = Mesh.cube();
-        shader = new Shader('\
-            void main() {\
-                gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex, 1.0);\
-            }\
-        ', '\
-            void main() {\
-                gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\
-            }\
-        ');
-    }
+    gl.onupdate = function(seconds) {
+      angle += 45 * seconds;
+    };
 
-    function update(seconds) {
-        angle += 45 * seconds;
-    }
+    gl.ondraw = function() {
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.loadIdentity();
+      gl.translate(0, 0, -5);
+      gl.rotate(30, 1, 0, 0);
+      gl.rotate(angle, 0, 1, 0);
 
-    function draw() {
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.loadIdentity();
-        gl.translate(0, 0, -5);
-        gl.rotate(30, 1, 0, 0);
-        gl.rotate(angle, 0, 1, 0);
-        shader.draw(mesh);
-    }
+      shader.draw(mesh);
+    };
 
-    </script>
+    gl.fullscreen();
+    gl.animate();
+
+    </script></body>
 
 ## Documentation
 
