@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html><head>
+  <script src="../lightgl.js"></script>
+</head><body>
+  <script>
+
+var angle = 0;
+var gl = GL.create();
+var mesh = GL.Mesh.plane({ coords: true });
+var texture = GL.Texture.fromURL('texture.png');
+var texture2 = GL.Texture.fromURL('texture2.png');
+var shader = new GL.Shader('\
+  varying vec2 coord;\
+  void main() {\
+    coord = gl_TexCoord.xy;\
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\
+  }\
+', '\
+  uniform sampler2D texture;\
+  uniform sampler2D texture2;\
+  varying vec2 coord;\
+  void main() {\
+    gl_FragColor = texture2D(texture, coord) - texture2D(texture2, coord);\
+  }\
+');
+
+gl.onupdate = function(seconds) {
+  angle += 45 * seconds;
+};
+
+gl.ondraw = function() {
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.loadIdentity();
+  gl.translate(0, 0, -5);
+  gl.rotate(30, 1, 0, 0);
+  gl.rotate(angle, 0, 1, 0);
+
+  texture.bind(0);
+  texture2.bind(1);
+  shader.uniforms({
+    texture: 0,
+    texture2: 1
+  }).draw(mesh);
+};
+
+gl.fullscreen();
+gl.animate();
+
+  </script>
+</body></html>
