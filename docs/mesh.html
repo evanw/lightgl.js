@@ -1,5 +1,40 @@
 <!DOCTYPE html>  <html> <head>   <title>mesh.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="main.html">                 main.js               </a>                                           <a class="source" href="matrix.html">                 matrix.js               </a>                                           <a class="source" href="mesh.html">                 mesh.js               </a>                                           <a class="source" href="raytracer.html">                 raytracer.js               </a>                                           <a class="source" href="shader.html">                 shader.js               </a>                                           <a class="source" href="texture.html">                 texture.js               </a>                                           <a class="source" href="vector.html">                 vector.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               mesh.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>Represents indexed triangle geometry with arbitrary additional attributes.
-You need a shader to draw a mesh; meshes can't draw themselves.</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <h3>new GL.Indexer()</h3>
+You need a shader to draw a mesh; meshes can't draw themselves.</p>
+
+<p>A mesh is a collection of <code>GL.Buffer</code> objects which are either vertex buffers
+(holding per-vertex attributes) or index buffers (holding the order in which
+vertices are rendered). By default, a mesh has a position vertex buffer called
+<code>vertices</code> and a triangle index buffer called <code>triangles</code>. New buffers can be
+added using <code>addVertexBuffer()</code> and <code>addIndexBuffer()</code>. Two strings are
+required when adding a new vertex buffer, the name of the data array on the
+mesh instance and the name of the GLSL attribute in the vertex shader.</p>
+
+<p>Example usage:</p>
+
+<pre><code>var mesh = new GL.Mesh({ coords: true, lines: true });
+
+// Default attribute "vertices", available as "gl_Vertex" in
+// the vertex shader
+mesh.vertices = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]];
+
+// Optional attribute "coords" enabled in constructor,
+// available as "gl_TexCoord" in the vertex shader
+mesh.coords = [[0, 0], [1, 0], [0, 1], [1, 1]];
+
+// Custom attribute "weights", available as "weight" in the
+// vertex shader
+mesh.addVertexBuffer('weights', 'weight');
+mesh.weights = [1, 0, 0, 1];
+
+// Default index buffer "triangles"
+mesh.triangles = [[0, 1, 2], [2, 1, 3]];
+
+// Optional index buffer "lines" enabled in constructor
+mesh.lines = [[0, 1], [0, 2], [1, 3], [2, 3]];
+
+// Upload provided data to GPU memory
+mesh.compile();
+</code></pre>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <h3>new GL.Indexer()</h3>
 
 <p>Generates indices into a list of unique objects from a stream of objects
 that may contain duplicates. This is useful for generating compact indexed
@@ -310,19 +345,21 @@ Example usage:</p>
 
 <pre><code>var data = {
   vertices: [[0, 0, 0], [1, 0, 0], [0, 1, 0]],
-  triangles: [0, 1, 2]
+  triangles: [[0, 1, 2]]
 };
 var mesh = GL.Mesh.load(data);
 </code></pre>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">Mesh</span><span class="p">.</span><span class="nx">load</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">json</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
   <span class="nx">options</span> <span class="o">=</span> <span class="nx">options</span> <span class="o">||</span> <span class="p">{};</span>
   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="s1">&#39;coords&#39;</span> <span class="k">in</span> <span class="nx">options</span><span class="p">))</span> <span class="nx">options</span><span class="p">.</span><span class="nx">coords</span> <span class="o">=</span> <span class="o">!!</span><span class="nx">json</span><span class="p">.</span><span class="nx">coords</span><span class="p">;</span>
   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="s1">&#39;normals&#39;</span> <span class="k">in</span> <span class="nx">options</span><span class="p">))</span> <span class="nx">options</span><span class="p">.</span><span class="nx">normals</span> <span class="o">=</span> <span class="o">!!</span><span class="nx">json</span><span class="p">.</span><span class="nx">normals</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="s1">&#39;triangles&#39;</span> <span class="k">in</span> <span class="nx">options</span><span class="p">))</span> <span class="nx">options</span><span class="p">.</span><span class="nx">triangles</span> <span class="o">=</span> <span class="o">!!</span><span class="nx">json</span><span class="p">.</span><span class="nx">triangles</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="s1">&#39;lines&#39;</span> <span class="k">in</span> <span class="nx">options</span><span class="p">))</span> <span class="nx">options</span><span class="p">.</span><span class="nx">lines</span> <span class="o">=</span> <span class="o">!!</span><span class="nx">json</span><span class="p">.</span><span class="nx">lines</span><span class="p">;</span>
   <span class="kd">var</span> <span class="nx">mesh</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Mesh</span><span class="p">(</span><span class="nx">options</span><span class="p">);</span>
   <span class="nx">mesh</span><span class="p">.</span><span class="nx">vertices</span> <span class="o">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">vertices</span><span class="p">;</span>
   <span class="k">if</span> <span class="p">(</span><span class="nx">mesh</span><span class="p">.</span><span class="nx">coords</span><span class="p">)</span> <span class="nx">mesh</span><span class="p">.</span><span class="nx">coords</span> <span class="o">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">coords</span><span class="p">;</span>
   <span class="k">if</span> <span class="p">(</span><span class="nx">mesh</span><span class="p">.</span><span class="nx">normals</span><span class="p">)</span> <span class="nx">mesh</span><span class="p">.</span><span class="nx">normals</span> <span class="o">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">normals</span><span class="p">;</span>
-  <span class="nx">mesh</span><span class="p">.</span><span class="nx">triangles</span> <span class="o">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">triangles</span> <span class="o">||</span> <span class="p">[];</span>
-  <span class="nx">mesh</span><span class="p">.</span><span class="nx">lines</span> <span class="o">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">lines</span> <span class="o">||</span> <span class="p">[];</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">mesh</span><span class="p">.</span><span class="nx">triangles</span><span class="p">)</span> <span class="nx">mesh</span><span class="p">.</span><span class="nx">triangles</span> <span class="o">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">triangles</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">mesh</span><span class="p">.</span><span class="nx">lines</span><span class="p">)</span> <span class="nx">mesh</span><span class="p">.</span><span class="nx">lines</span> <span class="o">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">lines</span><span class="p">;</span>
   <span class="nx">mesh</span><span class="p">.</span><span class="nx">compile</span><span class="p">();</span>
   <span class="k">return</span> <span class="nx">mesh</span><span class="p">;</span>
 <span class="p">};</span>
