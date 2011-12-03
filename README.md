@@ -53,13 +53,13 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
 
 The documentation is automatically generated using [Docco](http://jashkenas.github.com/docco/):
 
-* [main.js](http://evanw.github.com/lightgl.js/docs/main.html)
-* [matrix.js](http://evanw.github.com/lightgl.js/docs/matrix.html)
-* [mesh.js](http://evanw.github.com/lightgl.js/docs/mesh.html)
-* [raytracer.js](http://evanw.github.com/lightgl.js/docs/raytracer.html)
-* [shader.js](http://evanw.github.com/lightgl.js/docs/shader.html)
-* [texture.js](http://evanw.github.com/lightgl.js/docs/texture.html)
-* [vector.js](http://evanw.github.com/lightgl.js/docs/vector.html)
+* [main.js](http://evanw.github.com/lightgl.js/docs/main.html) (`GL`)
+* [matrix.js](http://evanw.github.com/lightgl.js/docs/matrix.html) (`GL.Matrix`)
+* [mesh.js](http://evanw.github.com/lightgl.js/docs/mesh.html) (`GL.Indexer`, `GL.Buffer`, `GL.Mesh`)
+* [raytracer.js](http://evanw.github.com/lightgl.js/docs/raytracer.html) (`GL.HitTest`, `GL.Raytracer`)
+* [shader.js](http://evanw.github.com/lightgl.js/docs/shader.html) (`GL.Shader`)
+* [texture.js](http://evanw.github.com/lightgl.js/docs/texture.html) (`GL.Texture`)
+* [vector.js](http://evanw.github.com/lightgl.js/docs/vector.html) (`GL.Vector`)
 
 ## Examples
 

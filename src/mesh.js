@@ -1,5 +1,39 @@
 // Represents indexed triangle geometry with arbitrary additional attributes.
 // You need a shader to draw a mesh; meshes can't draw themselves.
+// 
+// A mesh is a collection of `GL.Buffer` objects which are either vertex buffers
+// (holding per-vertex attributes) or index buffers (holding the order in which
+// vertices are rendered). By default, a mesh has a position vertex buffer called
+// `vertices` and a triangle index buffer called `triangles`. New buffers can be
+// added using `addVertexBuffer()` and `addIndexBuffer()`. Two strings are
+// required when adding a new vertex buffer, the name of the data array on the
+// mesh instance and the name of the GLSL attribute in the vertex shader.
+// 
+// Example usage:
+// 
+//     var mesh = new GL.Mesh({ coords: true, lines: true });
+// 
+//     // Default attribute "vertices", available as "gl_Vertex" in
+//     // the vertex shader
+//     mesh.vertices = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]];
+// 
+//     // Optional attribute "coords" enabled in constructor,
+//     // available as "gl_TexCoord" in the vertex shader
+//     mesh.coords = [[0, 0], [1, 0], [0, 1], [1, 1]];
+// 
+//     // Custom attribute "weights", available as "weight" in the
+//     // vertex shader
+//     mesh.addVertexBuffer('weights', 'weight');
+//     mesh.weights = [1, 0, 0, 1];
+// 
+//     // Default index buffer "triangles"
+//     mesh.triangles = [[0, 1, 2], [2, 1, 3]];
+// 
+//     // Optional index buffer "lines" enabled in constructor
+//     mesh.lines = [[0, 1], [0, 2], [1, 3], [2, 3]];
+// 
+//     // Upload provided data to GPU memory
+//     mesh.compile();
 
 // ### new GL.Indexer()
 // 
@@ -37,6 +71,7 @@ Indexer.prototype = {
 //     indices.data = [[0, 1, 2], [2, 1, 3]];
 //     vertices.compile();
 //     indices.compile();
+// 
 function Buffer(target, type) {
   this.buffer = null;
   this.target = target;
@@ -364,19 +399,22 @@ Mesh.sphere = function(options) {
 // 
 //     var data = {
 //       vertices: [[0, 0, 0], [1, 0, 0], [0, 1, 0]],
-//       triangles: [0, 1, 2]
+//       triangles: [[0, 1, 2]]
 //     };
 //     var mesh = GL.Mesh.load(data);
+// 
 Mesh.load = function(json, options) {
   options = options || {};
   if (!('coords' in options)) options.coords = !!json.coords;
   if (!('normals' in options)) options.normals = !!json.normals;
+  if (!('triangles' in options)) options.triangles = !!json.triangles;
+  if (!('lines' in options)) options.lines = !!json.lines;
   var mesh = new Mesh(options);
   mesh.vertices = json.vertices;
   if (mesh.coords) mesh.coords = json.coords;
   if (mesh.normals) mesh.normals = json.normals;
-  mesh.triangles = json.triangles || [];
-  mesh.lines = json.lines || [];
+  if (mesh.triangles) mesh.triangles = json.triangles;
+  if (mesh.lines) mesh.lines = json.lines;
   mesh.compile();
   return mesh;
 };
