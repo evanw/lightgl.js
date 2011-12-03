@@ -112,7 +112,16 @@ Texture.prototype = {
 Texture.fromImage = function(image, options) {
   options = options || {};
   var texture = new Texture(image.width, image.height, options);
-  gl.texImage2D(gl.TEXTURE_2D, 0, texture.format, texture.format, texture.type, image);
+  try {
+    gl.texImage2D(gl.TEXTURE_2D, 0, texture.format, texture.format, texture.type, image);
+  } catch (e) {
+    if (location.protocol == 'file:') {
+      throw 'image not loaded for security reasons (serve this page over "http://" instead)';
+    } else {
+      throw 'image not loaded for security reasons (image must originate from the same ' +
+        'domain as this page or use Cross-Origin Resource Sharing)';
+    }
+  }
   if (options.minFilter && options.minFilter != gl.NEAREST && options.minFilter != gl.LINEAR) {
     gl.generateMipmap(gl.TEXTURE_2D);
   }
