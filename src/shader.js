@@ -25,6 +25,7 @@
 function Shader(vertexSource, fragmentSource) {
   // Headers are prepended to the sources to provide some automatic functionality.
   var header = '\
+    uniform mat3 gl_NormalMatrix;\
     uniform mat4 gl_ModelViewMatrix;\
     uniform mat4 gl_ProjectionMatrix;\
     uniform mat4 gl_ModelViewProjectionMatrix;\
@@ -34,24 +35,40 @@ function Shader(vertexSource, fragmentSource) {
     attribute vec4 gl_TexCoord;\
     attribute vec3 gl_Normal;\
     attribute vec4 gl_Color;\
-  ' + header;
+  ' + header + '\
+    vec4 ftransform() {\
+      return gl_ModelViewProjectionMatrix * gl_Vertex;\
+    }\
+  ';
   var fragmentHeader = '\
     precision highp float;\
   ' + header;
 
-  // The `gl_` prefix must be substituted for something else to avoid compile errors,
-  // since it's a reserved prefix. This prefixes all reserved names with `_`.
+  // Check for the use of built-in matrices that require expensive matrix
+  // multiplications to compute
+  var source = vertexSource + fragmentSource;
+  this.needsMVPM = /(gl_ModelViewProjectionMatrix|ftransform)/.test(source);
+  this.needsNM = /gl_NormalMatrix/.test(source);
+
   function regexMap(regex, text, callback) {
     while ((result = regex.exec(text)) != null) {
       callback(result);
     }
   }
-  // Insert the header after any extensions, since those must come first.
+
+  // The `gl_` prefix must be substituted for something else to avoid compile
+  // errors, since it's a reserved prefix. This prefixes all reserved names with
+  // `_`. The header is inserted after any extensions, since those must come
+  // first.
   function fix(header, source) {
+    var replaced = {};
     var match = /^((\s*\/\/.*\n|\s*#extension.*\n)+)[^]*$/.exec(source);
     source = match ? match[1] + header + source.substr(match[1].length) : header + source;
     regexMap(/\bgl_\w+\b/g, header, function(result) {
-      source = source.replace(new RegExp(result, 'g'), '_' + result);
+      if (!(result in replaced)) {
+        source = source.replace(new RegExp('\\b' + result + '\\b', 'g'), '_' + result);
+        replaced[result] = true;
+      }
     });
     return source;
   }
@@ -84,7 +101,6 @@ function Shader(vertexSource, fragmentSource) {
     isSampler[groups[2]] = 1;
   });
   this.isSampler = isSampler;
-  this.needsMVP = (vertexSource + fragmentSource).indexOf('gl_ModelViewProjectionMatrix') != -1;
 }
 
 function isArray(obj) {
@@ -96,6 +112,9 @@ function isNumber(obj) {
   var str = Object.prototype.toString.call(obj);
   return str == '[object Number]' || str == '[object Boolean]';
 }
+
+var tempMatrix = new Matrix();
+var resultMatrix = new Matrix();
 
 Shader.prototype = {
   // ### .uniforms(uniforms)
@@ -170,9 +189,15 @@ Shader.prototype = {
       _gl_ModelViewMatrix: gl.modelviewMatrix,
       _gl_ProjectionMatrix: gl.projectionMatrix
     });
-    if (this.needsMVP) this.uniforms({
-      _gl_ModelViewProjectionMatrix: gl.projectionMatrix.multiply(gl.modelviewMatrix)
+    if (this.needsMVPM) this.uniforms({
+      _gl_ModelViewProjectionMatrix: Matrix.multiply(gl.projectionMatrix, gl.modelviewMatrix, resultMatrix)
     });
+    if (this.needsNM) {
+      var m = Matrix.transpose(Matrix.inverse(gl.modelviewMatrix, tempMatrix), resultMatrix).m;
+      this.uniforms({
+        _gl_NormalMatrix: [m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]]
+      });
+    }
 
     // Create and enable attribute pointers as necessary.
     var length = 0;
