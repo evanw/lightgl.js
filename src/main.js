@@ -357,6 +357,7 @@ function addOtherMethods() {
         'window.onload() or from inside the <body> tag)';
     }
     document.body.appendChild(gl.canvas);
+    document.body.style.overflow = 'hidden';
     gl.canvas.style.position = 'absolute';
     gl.canvas.style.left = left + 'px';
     gl.canvas.style.top = top + 'px';

@@ -72,3 +72,4 @@ Available examples:
 * [OpenGL immediate mode](http://evanw.github.com/lightgl.js/tests/immediatemode.html)
 * [Rendering to a texture](http://evanw.github.com/lightgl.js/tests/rtt.html)
 * [Shadow map from a point light](http://evanw.github.com/lightgl.js/tests/shadowmap.html)
+* [Realtime raytracing](http://evanw.github.com/lightgl.js/tests/raytracing.html)
