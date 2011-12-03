@@ -51,7 +51,15 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
 
 ## Documentation
 
-Documentation is available at http://evanw.github.com/lightgl.js/docs/main.html.
+The documentation is automatically generated using [Docco](http://jashkenas.github.com/docco/):
+
+* [main.js](http://evanw.github.com/lightgl.js/docs/main.html)
+* [matrix.js](http://evanw.github.com/lightgl.js/docs/matrix.html)
+* [mesh.js](http://evanw.github.com/lightgl.js/docs/mesh.html)
+* [raytracer.js](http://evanw.github.com/lightgl.js/docs/raytracer.html)
+* [shader.js](http://evanw.github.com/lightgl.js/docs/shader.html)
+* [texture.js](http://evanw.github.com/lightgl.js/docs/texture.html)
+* [vector.js](http://evanw.github.com/lightgl.js/docs/vector.html)
 
 ## Examples
 
