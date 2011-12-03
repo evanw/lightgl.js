@@ -11,8 +11,10 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
 
 ## Sample code
 
-    <script src="lightgl.js"></script>
-    <body><script>
+    <!DOCTYPE html>
+    <html><body>
+      <script src="lightgl.js"></script>
+      <script>
 
     var angle = 0;
     var gl = GL.create();
@@ -44,7 +46,8 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
     gl.fullscreen();
     gl.animate();
 
-    </script></body>
+      </script>
+    </body></html>
 
 ## Documentation
 

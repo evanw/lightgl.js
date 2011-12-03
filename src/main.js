@@ -352,6 +352,10 @@ function addOtherMethods() {
     var left = options.paddingLeft || 0;
     var right = options.paddingRight || 0;
     var bottom = options.paddingBottom || 0;
+    if (!document.body) {
+      throw 'document.body doesn\'t exist yet (call gl.fullscreen() from ' +
+        'window.onload() or from inside the <body> tag)';
+    }
     document.body.appendChild(gl.canvas);
     gl.canvas.style.position = 'absolute';
     gl.canvas.style.left = left + 'px';
