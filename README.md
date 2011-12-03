@@ -69,5 +69,6 @@ Available examples:
 * [Multitexturing](http://evanw.github.com/lightgl.js/tests/multitexture.html)
 * [First person camera](http://evanw.github.com/lightgl.js/tests/camera.html)
 * [Scene manipulation](http://evanw.github.com/lightgl.js/tests/scenemanip.html)
+* [OpenGL immediate mode](http://evanw.github.com/lightgl.js/tests/immediatemode.html)
 * [Rendering to a texture](http://evanw.github.com/lightgl.js/tests/rtt.html)
 * [Shadow map from a point light](http://evanw.github.com/lightgl.js/tests/shadowmap.html)
