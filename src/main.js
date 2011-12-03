@@ -271,7 +271,7 @@ function mapKeyCode(code) {
     39: 'RIGHT',
     40: 'DOWN'
   };
-  return named[code] || (code >= 65 && code <= 90) ? String.fromCharCode(code) : null;
+  return named[code] || (code >= 65 && code <= 90 ? String.fromCharCode(code) : null);
 }
 
 function on(element, name, callback) {
