@@ -27,22 +27,23 @@ gl.onmousemove = function(e) {
   if (e.dragging) {
     angleY -= e.deltaX * 0.25;
     angleX = Math.max(-90, Math.min(90, angleX - e.deltaY * 0.25));
-    draw();
   }
 };
 
 gl.onupdate = function(seconds) {
-  var forward = GL.Vector.fromAngles((90 - angleY) * Math.PI / 180, (180 - angleX) * Math.PI / 180);
-  var sideways = GL.Vector.fromAngles(-angleY * Math.PI / 180, 0);
   var speed = seconds * 4;
 
   // Forward movement
-  if (GL.keys.W && !GL.keys.S) camera = camera.add(forward.multiply(speed));
-  else if (!GL.keys.W && GL.keys.S) camera = camera.subtract(forward.multiply(speed));
+  var up = GL.keys.W | GL.keys.UP;
+  var down = GL.keys.S | GL.keys.DOWN;
+  var forward = GL.Vector.fromAngles((90 - angleY) * Math.PI / 180, (180 - angleX) * Math.PI / 180);
+  camera = camera.add(forward.multiply(speed * (up - down)));
 
   // Sideways movement
-  if (GL.keys.D && !GL.keys.A) camera = camera.add(sideways.multiply(speed));
-  else if (!GL.keys.D && GL.keys.A) camera = camera.subtract(sideways.multiply(speed));
+  var left = GL.keys.A | GL.keys.LEFT;
+  var right = GL.keys.D | GL.keys.RIGHT;
+  var sideways = GL.Vector.fromAngles(-angleY * Math.PI / 180, 0);
+  camera = camera.add(sideways.multiply(speed * (right - left)));
 };
 
 gl.ondraw = function() {
@@ -52,7 +53,7 @@ gl.ondraw = function() {
   gl.rotate(-angleY, 0, 1, 0);
   gl.translate(-camera.x, -camera.y, -camera.z);
 
-  shader.uniforms({ brightness: 1 }).draw(mesh);
+  shader.uniforms({ brightness: 1 }).draw(mesh, gl.TRIANGLES);
   shader.uniforms({ brightness: 0 }).draw(mesh, gl.LINES);
 };
 
