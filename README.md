@@ -9,6 +9,8 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
 * `python build.py release`: minify the library using Google Closure Compiler, which assumes there is a `closure` command in your path that runs `compiler.jar`
 * `docco src/*.js`: build the documentation, which is generated in the `docs` directory
 
+The latest lightgl.js build can be found at http://evanw.github.com/lightgl.js/lightgl.js.
+
 ## Sample code
 
     <!DOCTYPE html>
