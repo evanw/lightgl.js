@@ -222,21 +222,33 @@ function addEventListeners() {
     }
     return false;
   }
-  function augment(e) {
-    var x = e.pageX, y = e.pageY;
+  function augment(original) {
+    e = Object.create(original);
+    e.original = original;
+    e.x = e.pageX;
+    e.y = e.pageY;
     for (var obj = gl.canvas; obj; obj = obj.offsetParent) {
-      x -= obj.offsetLeft;
-      y -= obj.offsetTop;
+      e.x -= obj.offsetLeft;
+      e.y -= obj.offsetTop;
     }
     if (hasOld) {
-      e.deltaX = x - oldX; e.deltaY = y - oldY;
+      e.deltaX = e.x - oldX;
+      e.deltaY = e.y - oldY;
     } else {
-      e.deltaX = 0; e.deltaY = 0;
+      e.deltaX = 0;
+      e.deltaY = 0;
       hasOld = true;
     }
-    e.x = x; e.y = y;
-    oldX = x; oldY = y;
+    oldX = e.x;
+    oldY = e.y;
     e.dragging = isDragging();
+    e.preventDefault = function() {
+      e.original.preventDefault();
+    };
+    e.stopPropagation = function() {
+      e.original.stopPropagation();
+    };
+    return e;
   }
   function mousedown(e) {
     if (!isDragging()) {
@@ -247,12 +259,12 @@ function addEventListeners() {
       off(gl.canvas, 'mouseup', mouseup);
     }
     buttons[e.which] = true;
-    augment(e);
+    e = augment(e);
     if (gl.onmousedown) gl.onmousedown(e);
     e.preventDefault();
   }
   function mousemove(e) {
-    augment(e);
+    e = augment(e);
     if (gl.onmousemove) gl.onmousemove(e);
     e.preventDefault();
   }
@@ -265,7 +277,7 @@ function addEventListeners() {
       on(gl.canvas, 'mousemove', mousemove);
       on(gl.canvas, 'mouseup', mouseup);
     }
-    augment(e);
+    e = augment(e);
     if (gl.onmouseup) gl.onmouseup(e);
     e.preventDefault();
   }
