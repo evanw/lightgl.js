@@ -195,38 +195,65 @@ because it's only meant for quick debugging tasks.</p>             </td>        
 <code>gl.onmousedown()</code>, <code>gl.onmousemove()</code>, and <code>gl.onmouseup()</code> with an
 augmented event object. The event object also has the properties <code>x</code>, <code>y</code>,
 <code>deltaX</code>, <code>deltaY</code>, and <code>dragging</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">function</span> <span class="nx">addEventListeners</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">oldX</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">oldY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">buttons</span> <span class="o">=</span> <span class="p">{};</span>
+  <span class="kd">var</span> <span class="nx">oldX</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">oldY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">buttons</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">hasOld</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="kd">function</span> <span class="nx">isDragging</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">b</span> <span class="k">in</span> <span class="nx">buttons</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">buttons</span><span class="p">[</span><span class="nx">b</span><span class="p">])</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
   <span class="kd">function</span> <span class="nx">augment</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">pageX</span><span class="p">,</span> <span class="nx">y</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">pageY</span><span class="p">;</span>
     <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">obj</span> <span class="o">=</span> <span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">;</span> <span class="nx">obj</span><span class="p">;</span> <span class="nx">obj</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">offsetParent</span><span class="p">)</span> <span class="p">{</span>
       <span class="nx">x</span> <span class="o">-=</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">offsetLeft</span><span class="p">;</span>
       <span class="nx">y</span> <span class="o">-=</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">offsetTop</span><span class="p">;</span>
     <span class="p">}</span>
-    <span class="nx">e</span><span class="p">.</span><span class="nx">deltaX</span> <span class="o">=</span> <span class="nx">x</span> <span class="o">-</span> <span class="nx">oldX</span><span class="p">;</span> <span class="nx">e</span><span class="p">.</span><span class="nx">deltaY</span> <span class="o">=</span> <span class="nx">y</span> <span class="o">-</span> <span class="nx">oldY</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">hasOld</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">e</span><span class="p">.</span><span class="nx">deltaX</span> <span class="o">=</span> <span class="nx">x</span> <span class="o">-</span> <span class="nx">oldX</span><span class="p">;</span> <span class="nx">e</span><span class="p">.</span><span class="nx">deltaY</span> <span class="o">=</span> <span class="nx">y</span> <span class="o">-</span> <span class="nx">oldY</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">e</span><span class="p">.</span><span class="nx">deltaX</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">e</span><span class="p">.</span><span class="nx">deltaY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+      <span class="nx">hasOld</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    <span class="p">}</span>
     <span class="nx">e</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span> <span class="nx">e</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span>
     <span class="nx">oldX</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span> <span class="nx">oldY</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span>
-    <span class="nx">e</span><span class="p">.</span><span class="nx">dragging</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
-    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">b</span> <span class="k">in</span> <span class="nx">buttons</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">buttons</span><span class="p">[</span><span class="nx">b</span><span class="p">])</span> <span class="p">{</span>
-        <span class="nx">e</span><span class="p">.</span><span class="nx">dragging</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
+    <span class="nx">e</span><span class="p">.</span><span class="nx">dragging</span> <span class="o">=</span> <span class="nx">isDragging</span><span class="p">();</span>
   <span class="p">}</span>
-  <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mousedown&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">function</span> <span class="nx">mousedown</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isDragging</span><span class="p">())</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>Expand the event handlers to the document to handle dragging off canvas.</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">on</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;mousemove&#39;</span><span class="p">,</span> <span class="nx">mousemove</span><span class="p">);</span>
+      <span class="nx">on</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;mouseup&#39;</span><span class="p">,</span> <span class="nx">mouseup</span><span class="p">);</span>
+      <span class="nx">off</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mousemove&#39;</span><span class="p">,</span> <span class="nx">mousemove</span><span class="p">);</span>
+      <span class="nx">off</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mouseup&#39;</span><span class="p">,</span> <span class="nx">mouseup</span><span class="p">);</span>
+    <span class="p">}</span>
     <span class="nx">buttons</span><span class="p">[</span><span class="nx">e</span><span class="p">.</span><span class="nx">which</span><span class="p">]</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
     <span class="nx">augment</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">onmousedown</span><span class="p">)</span> <span class="nx">gl</span><span class="p">.</span><span class="nx">onmousedown</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
-  <span class="p">});</span>
-  <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mousemove&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="kd">function</span> <span class="nx">mousemove</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">augment</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">onmousemove</span><span class="p">)</span> <span class="nx">gl</span><span class="p">.</span><span class="nx">onmousemove</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
-  <span class="p">});</span>
-  <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mouseup&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="kd">function</span> <span class="nx">mouseup</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">buttons</span><span class="p">[</span><span class="nx">e</span><span class="p">.</span><span class="nx">which</span><span class="p">]</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">isDragging</span><span class="p">())</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p>Shrink the event handlers back to the canvas when dragging ends.</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">off</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;mousemove&#39;</span><span class="p">,</span> <span class="nx">mousemove</span><span class="p">);</span>
+      <span class="nx">off</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;mouseup&#39;</span><span class="p">,</span> <span class="nx">mouseup</span><span class="p">);</span>
+      <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mousemove&#39;</span><span class="p">,</span> <span class="nx">mousemove</span><span class="p">);</span>
+      <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mouseup&#39;</span><span class="p">,</span> <span class="nx">mouseup</span><span class="p">);</span>
+    <span class="p">}</span>
     <span class="nx">augment</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">onmouseup</span><span class="p">)</span> <span class="nx">gl</span><span class="p">.</span><span class="nx">onmouseup</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
-  <span class="p">});</span>
-<span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <h3>Automatic keyboard state</h3>
+    <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="kd">function</span> <span class="nx">reset</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">hasOld</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mousedown&#39;</span><span class="p">,</span> <span class="nx">mousedown</span><span class="p">);</span>
+  <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mousemove&#39;</span><span class="p">,</span> <span class="nx">mousemove</span><span class="p">);</span>
+  <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mouseup&#39;</span><span class="p">,</span> <span class="nx">mouseup</span><span class="p">);</span>
+  <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mouseover&#39;</span><span class="p">,</span> <span class="nx">reset</span><span class="p">);</span>
+  <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mouseout&#39;</span><span class="p">,</span> <span class="nx">reset</span><span class="p">);</span>
+<span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <h3>Automatic keyboard state</h3>
 
 <p>The current keyboard state is stored in <code>GL.keys</code>, a map of integer key
 codes to booleans indicating whether that key is currently pressed. Certain
@@ -254,6 +281,10 @@ cast the value to boolean by applying the not operator twice (as in
   <span class="nx">element</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
 <span class="p">}</span>
 
+<span class="kd">function</span> <span class="nx">off</span><span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">element</span><span class="p">.</span><span class="nx">removeEventListener</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+<span class="p">}</span>
+
 <span class="nx">on</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;keydown&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">e</span><span class="p">.</span><span class="nx">altKey</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">e</span><span class="p">.</span><span class="nx">ctrlKey</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">e</span><span class="p">.</span><span class="nx">metaKey</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">key</span> <span class="o">=</span> <span class="nx">mapKeyCode</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">keyCode</span><span class="p">);</span>
@@ -270,14 +301,14 @@ cast the value to boolean by applying the not operator twice (as in
   <span class="p">}</span>
 <span class="p">});</span>
 
-<span class="kd">function</span> <span class="nx">addOtherMethods</span><span class="p">()</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <h3>Multiple contexts</h3>
+<span class="kd">function</span> <span class="nx">addOtherMethods</span><span class="p">()</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <h3>Multiple contexts</h3>
 
 <p>When using multiple contexts in one web page, <code>gl.makeCurrent()</code> must be
 called before issuing commands to a different context.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">gl</span><span class="p">.</span><span class="nx">makeCurrent</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
       <span class="nx">gl</span> <span class="o">=</span> <span class="nx">context</span><span class="p">;</span>
     <span class="p">};</span>
-  <span class="p">})(</span><span class="nx">gl</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <h3>Animation</h3>
+  <span class="p">})(</span><span class="nx">gl</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <h3>Animation</h3>
 
 <p>Call <code>gl.animate()</code> to provide an animation loop that repeatedly calls
 <code>gl.onupdate()</code> and <code>gl.ondraw()</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">gl</span><span class="p">.</span><span class="nx">animate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
@@ -297,7 +328,7 @@ called before issuing commands to a different context.</p>             </td>    
       <span class="nx">time</span> <span class="o">=</span> <span class="nx">now</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="nx">update</span><span class="p">();</span>
-  <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <h3>Fullscreen</h3>
+  <span class="p">};</span></pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <h3>Fullscreen</h3>
 
 <p>Provide an easy way to get a fullscreen app running, including an
 automatic 3D perspective projection matrix by default. This should be
@@ -347,7 +378,7 @@ called once.</p>
     <span class="nx">on</span><span class="p">(</span><span class="nb">window</span><span class="p">,</span> <span class="s1">&#39;resize&#39;</span><span class="p">,</span> <span class="nx">resize</span><span class="p">);</span>
     <span class="nx">resize</span><span class="p">();</span>
   <span class="p">};</span>
-<span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p>A value to bitwise-or with new enums to make them distinguishable from the
+<span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>A value to bitwise-or with new enums to make them distinguishable from the
 standard WebGL enums.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">var</span> <span class="nx">ENUM</span> <span class="o">=</span> <span class="mh">0x12340000</span><span class="p">;</span>
 
 </pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
