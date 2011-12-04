@@ -215,37 +215,68 @@ function addImmediateMode() {
 // augmented event object. The event object also has the properties `x`, `y`,
 // `deltaX`, `deltaY`, and `dragging`.
 function addEventListeners() {
-  var oldX = 0, oldY = 0, buttons = {};
+  var oldX = 0, oldY = 0, buttons = {}, hasOld = false;
+  function isDragging() {
+    for (var b in buttons) {
+      if (buttons[b]) return true;
+    }
+    return false;
+  }
   function augment(e) {
     var x = e.pageX, y = e.pageY;
     for (var obj = gl.canvas; obj; obj = obj.offsetParent) {
       x -= obj.offsetLeft;
       y -= obj.offsetTop;
     }
-    e.deltaX = x - oldX; e.deltaY = y - oldY;
+    if (hasOld) {
+      e.deltaX = x - oldX; e.deltaY = y - oldY;
+    } else {
+      e.deltaX = 0; e.deltaY = 0;
+      hasOld = true;
+    }
     e.x = x; e.y = y;
     oldX = x; oldY = y;
-    e.dragging = false;
-    for (var b in buttons) {
-      if (buttons[b]) {
-        e.dragging = true;
-      }
-    }
+    e.dragging = isDragging();
   }
-  on(gl.canvas, 'mousedown', function(e) {
+  function mousedown(e) {
+    if (!isDragging()) {
+      // Expand the event handlers to the document to handle dragging off canvas.
+      on(document, 'mousemove', mousemove);
+      on(document, 'mouseup', mouseup);
+      off(gl.canvas, 'mousemove', mousemove);
+      off(gl.canvas, 'mouseup', mouseup);
+    }
     buttons[e.which] = true;
     augment(e);
     if (gl.onmousedown) gl.onmousedown(e);
-  });
-  on(gl.canvas, 'mousemove', function(e) {
+    e.preventDefault();
+  }
+  function mousemove(e) {
     augment(e);
     if (gl.onmousemove) gl.onmousemove(e);
-  });
-  on(gl.canvas, 'mouseup', function(e) {
+    e.preventDefault();
+  }
+  function mouseup(e) {
     buttons[e.which] = false;
+    if (!isDragging()) {
+      // Shrink the event handlers back to the canvas when dragging ends.
+      off(document, 'mousemove', mousemove);
+      off(document, 'mouseup', mouseup);
+      on(gl.canvas, 'mousemove', mousemove);
+      on(gl.canvas, 'mouseup', mouseup);
+    }
     augment(e);
     if (gl.onmouseup) gl.onmouseup(e);
-  });
+    e.preventDefault();
+  }
+  function reset() {
+    hasOld = false;
+  }
+  on(gl.canvas, 'mousedown', mousedown);
+  on(gl.canvas, 'mousemove', mousemove);
+  on(gl.canvas, 'mouseup', mouseup);
+  on(gl.canvas, 'mouseover', reset);
+  on(gl.canvas, 'mouseout', reset);
 }
 
 // ### Automatic keyboard state
@@ -276,6 +307,10 @@ function mapKeyCode(code) {
 
 function on(element, name, callback) {
   element.addEventListener(name, callback);
+}
+
+function off(element, name, callback) {
+  element.removeEventListener(name, callback);
 }
 
 on(document, 'keydown', function(e) {

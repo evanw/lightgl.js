@@ -1,6 +1,6 @@
 # lightgl.js
 
-This library makes it easier to quickly prototype WebGL applications. It's lower level than many other WebGL libraries and while it doesn't provide a scene graph, it re-implements OpenGL's modelview/projection matrix stack to provide similar functionality. It also re-introduces some built-in uniforms from GLSL, including `gl_Vertex` and `gl_ModelViewProjectionMatrix`.
+This library makes it easier to quickly prototype WebGL applications. It's lower level than many other WebGL libraries and while it doesn't provide a scene graph, it re-implements OpenGL's modelview/projection matrix stack to provide similar functionality. It also re-introduces some built-in uniforms from GLSL (such as `gl_Vertex` and `gl_ModelViewProjectionMatrix`) and OpenGL's immediate mode.
 
 ## Building the library
 
@@ -53,13 +53,13 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
 
 The documentation is automatically generated using [Docco](http://jashkenas.github.com/docco/):
 
-* [main.js](http://evanw.github.com/lightgl.js/docs/main.html) (`GL`)
-* [matrix.js](http://evanw.github.com/lightgl.js/docs/matrix.html) (`GL.Matrix`)
-* [mesh.js](http://evanw.github.com/lightgl.js/docs/mesh.html) (`GL.Indexer`, `GL.Buffer`, `GL.Mesh`)
-* [raytracer.js](http://evanw.github.com/lightgl.js/docs/raytracer.html) (`GL.HitTest`, `GL.Raytracer`)
-* [shader.js](http://evanw.github.com/lightgl.js/docs/shader.html) (`GL.Shader`)
-* [texture.js](http://evanw.github.com/lightgl.js/docs/texture.html) (`GL.Texture`)
-* [vector.js](http://evanw.github.com/lightgl.js/docs/vector.html) (`GL.Vector`)
+* [main.js](http://evanw.github.com/lightgl.js/docs/main.html): `GL`
+* [matrix.js](http://evanw.github.com/lightgl.js/docs/matrix.html): `GL.Matrix`
+* [mesh.js](http://evanw.github.com/lightgl.js/docs/mesh.html): `GL.Indexer`, `GL.Buffer`, `GL.Mesh`
+* [raytracer.js](http://evanw.github.com/lightgl.js/docs/raytracer.html): `GL.HitTest`, `GL.Raytracer`
+* [shader.js](http://evanw.github.com/lightgl.js/docs/shader.html): `GL.Shader`
+* [texture.js](http://evanw.github.com/lightgl.js/docs/texture.html): `GL.Texture`
+* [vector.js](http://evanw.github.com/lightgl.js/docs/vector.html): `GL.Vector`
 
 ## Examples
 
@@ -73,3 +73,4 @@ Available examples:
 * [Rendering to a texture](http://evanw.github.com/lightgl.js/tests/rtt.html)
 * [Shadow map from a point light](http://evanw.github.com/lightgl.js/tests/shadowmap.html)
 * [Realtime raytracing](http://evanw.github.com/lightgl.js/tests/raytracing.html)
+* [Constructive solid geometry](http://evanw.github.com/lightgl.js/tests/csg.html)

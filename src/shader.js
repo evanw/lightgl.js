@@ -30,12 +30,11 @@ function Shader(vertexSource, fragmentSource) {
     uniform mat4 gl_ProjectionMatrix;\
     uniform mat4 gl_ModelViewProjectionMatrix;\
   ';
-  var vertexHeader = '\
+  var vertexHeader = header + '\
     attribute vec4 gl_Vertex;\
     attribute vec4 gl_TexCoord;\
     attribute vec3 gl_Normal;\
     attribute vec4 gl_Color;\
-  ' + header + '\
     vec4 ftransform() {\
       return gl_ModelViewProjectionMatrix * gl_Vertex;\
     }\
