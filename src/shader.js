@@ -19,16 +19,33 @@
 //       color: [1, 0, 0, 1]
 //     }).draw(mesh);
 
+function regexMap(regex, text, callback) {
+  while ((result = regex.exec(text)) != null) {
+    callback(result);
+  }
+}
+
 // ### new GL.Shader(vertexSource, fragmentSource)
 // 
 // Compiles a shader program using the provided vertex and fragment shaders.
 function Shader(vertexSource, fragmentSource) {
+  // Allow passing in the id of a <script> tag with the source
+  function followScriptTagById(id) {
+    var element = document.getElementById(id);
+    return element ? element.text : id;
+  }
+  vertexSource = followScriptTagById(vertexSource);
+  fragmentSource = followScriptTagById(fragmentSource);
+
   // Headers are prepended to the sources to provide some automatic functionality.
   var header = '\
     uniform mat3 gl_NormalMatrix;\
     uniform mat4 gl_ModelViewMatrix;\
     uniform mat4 gl_ProjectionMatrix;\
     uniform mat4 gl_ModelViewProjectionMatrix;\
+    uniform mat4 gl_ModelViewMatrixInverse;\
+    uniform mat4 gl_ProjectionMatrixInverse;\
+    uniform mat4 gl_ModelViewProjectionMatrixInverse;\
   ';
   var vertexHeader = header + '\
     attribute vec4 gl_Vertex;\
@@ -44,16 +61,18 @@ function Shader(vertexSource, fragmentSource) {
   ' + header;
 
   // Check for the use of built-in matrices that require expensive matrix
-  // multiplications to compute
+  // multiplications to compute, and record these in `usedMatrices`.
   var source = vertexSource + fragmentSource;
-  this.needsMVPM = /(gl_ModelViewProjectionMatrix|ftransform)/.test(source);
-  this.needsNM = /gl_NormalMatrix/.test(source);
-
-  function regexMap(regex, text, callback) {
-    while ((result = regex.exec(text)) != null) {
-      callback(result);
+  var usedMatrices = {};
+  regexMap(/\b(gl_[^;]*)\b;/g, header, function(groups) {
+    var name = groups[1];
+    if (source.indexOf(name) != -1) {
+      var capitalLetters = name.replace(/[a-z_]/g, '');
+      usedMatrices[capitalLetters] = '_' + name;
     }
-  }
+  });
+  if (source.indexOf('ftransform') != -1) usedMatrices.MVPM = '_gl_ModelViewProjectionMatrix';
+  this.usedMatrices = usedMatrices;
 
   // The `gl_` prefix must be substituted for something else to avoid compile
   // errors, since it's a reserved prefix. This prefixes all reserved names with
@@ -184,19 +203,25 @@ Shader.prototype = {
   // like `gl.TRIANGLES` or `gl.LINES`. This method automatically creates and caches
   // vertex attribute pointers for attributes as needed.
   drawBuffers: function(vertexBuffers, indexBuffer, mode) {
-    this.uniforms({
-      _gl_ModelViewMatrix: gl.modelviewMatrix,
-      _gl_ProjectionMatrix: gl.projectionMatrix
-    });
-    if (this.needsMVPM) this.uniforms({
-      _gl_ModelViewProjectionMatrix: Matrix.multiply(gl.projectionMatrix, gl.modelviewMatrix, resultMatrix)
-    });
-    if (this.needsNM) {
-      var m = Matrix.transpose(Matrix.inverse(gl.modelviewMatrix, tempMatrix), resultMatrix).m;
-      this.uniforms({
-        _gl_NormalMatrix: [m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10]]
-      });
+    // Only construct up the built-in matrices we need for this shader.
+    var used = this.usedMatrices;
+    var MVM = gl.modelviewMatrix;
+    var PM = gl.projectionMatrix;
+    var MVMI = (used.MVMI || used.NM) ? MVM.inverse() : null;
+    var PMI = (used.PMI) ? PM.inverse() : null;
+    var MVPM = (used.MVPM || used.MVPMI) ? PM.multiply(MVM) : null;
+    var matrices = {};
+    if (used.MVM) matrices[used.MVM] = MVM;
+    if (used.MVMI) matrices[used.MVMI] = MVMI;
+    if (used.PM) matrices[used.PM] = PM;
+    if (used.PMI) matrices[used.PMI] = PMI;
+    if (used.MVPM) matrices[used.MVPM] = MVPM;
+    if (used.MVPMI) matrices[used.MVPMI] = MVPM.inverse();
+    if (used.NM) {
+      var m = MVMI.m;
+      matrices[used.NM] = [m[0], m[4], m[8], m[1], m[5], m[9], m[2], m[6], m[10]];
     }
+    this.uniforms(matrices);
 
     // Create and enable attribute pointers as necessary.
     var length = 0;
