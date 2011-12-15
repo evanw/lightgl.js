@@ -29,7 +29,7 @@ function regexMap(regex, text, callback) {
 // 
 // Compiles a shader program using the provided vertex and fragment shaders.
 function Shader(vertexSource, fragmentSource) {
-  // Allow passing in the id of a <script> tag with the source
+  // Allow passing in the id of an HTML script tag with the source
   function followScriptTagById(id) {
     var element = document.getElementById(id);
     return element ? element.text : id;
