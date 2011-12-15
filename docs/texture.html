@@ -128,7 +128,9 @@ it loads.</p>             </td>             <td class="code">               <div
   <span class="p">})();</span>
   <span class="kd">var</span> <span class="nx">texture</span> <span class="o">=</span> <span class="nx">Texture</span><span class="p">.</span><span class="nx">fromImage</span><span class="p">(</span><span class="nx">checkerboardCanvas</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
   <span class="kd">var</span> <span class="nx">image</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Image</span><span class="p">();</span>
+  <span class="kd">var</span> <span class="nx">context</span> <span class="o">=</span> <span class="nx">gl</span><span class="p">;</span>
   <span class="nx">image</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">context</span><span class="p">.</span><span class="nx">makeCurrent</span><span class="p">();</span>
     <span class="nx">Texture</span><span class="p">.</span><span class="nx">fromImage</span><span class="p">(</span><span class="nx">image</span><span class="p">,</span> <span class="nx">options</span><span class="p">).</span><span class="nx">swapWith</span><span class="p">(</span><span class="nx">texture</span><span class="p">);</span>
   <span class="p">};</span>
   <span class="nx">image</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="nx">url</span><span class="p">;</span>
