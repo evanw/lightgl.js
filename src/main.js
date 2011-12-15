@@ -215,7 +215,7 @@ function addImmediateMode() {
 // augmented event object. The event object also has the properties `x`, `y`,
 // `deltaX`, `deltaY`, and `dragging`.
 function addEventListeners() {
-  var oldX = 0, oldY = 0, buttons = {}, hasOld = false;
+  var context = gl, oldX = 0, oldY = 0, buttons = {}, hasOld = false;
   function isDragging() {
     for (var b in buttons) {
       if (buttons[b]) return true;
@@ -251,6 +251,7 @@ function addEventListeners() {
     return e;
   }
   function mousedown(e) {
+    gl = context;
     if (!isDragging()) {
       // Expand the event handlers to the document to handle dragging off canvas.
       on(document, 'mousemove', mousemove);
@@ -264,11 +265,13 @@ function addEventListeners() {
     e.preventDefault();
   }
   function mousemove(e) {
+    gl = context;
     e = augment(e);
     if (gl.onmousemove) gl.onmousemove(e);
     e.preventDefault();
   }
   function mouseup(e) {
+    gl = context;
     buttons[e.which] = false;
     if (!isDragging()) {
       // Shrink the event handlers back to the canvas when dragging ends.

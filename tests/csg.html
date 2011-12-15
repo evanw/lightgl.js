@@ -82,9 +82,9 @@ var b = CSG.sphere({ radius: 1.3, center: [0.25, 0.25, 0.25] });</pre>
   <p>The solids above were generated with the following code:</p>
   <pre>var a = CSG.cube();
 var b = CSG.sphere({ radius: 1.35, stacks: 12 });
-var c = CSG.cylinder({ radius: 0.7, start: new CSG.Vector(-1, 0, 0), end: new CSG.Vector(1, 0, 0) });
-var d = CSG.cylinder({ radius: 0.7, start: new CSG.Vector(0, -1, 0), end: new CSG.Vector(0, 1, 0) });
-var e = CSG.cylinder({ radius: 0.7, start: new CSG.Vector(0, 0, -1), end: new CSG.Vector(0, 0, 1) });</pre>
+var c = CSG.cylinder({ radius: 0.7, start: [-1, 0, 0], end: [1, 0, 0] });
+var d = CSG.cylinder({ radius: 0.7, start: [0, -1, 0], end: [0, 1, 0] });
+var e = CSG.cylinder({ radius: 0.7, start: [0, 0, -1], end: [0, 0, 1] });</pre>
 
   <script>
 
@@ -238,9 +238,9 @@ for (var i = 0; i < operations.length; i++) {
 // Generate example from wikipedia
 var a = CSG.cube();
 var b = CSG.sphere({ radius: 1.35, stacks: 12 });
-var c = CSG.cylinder({ radius: 0.7, start: new CSG.Vector(-1, 0, 0), end: new CSG.Vector(1, 0, 0) });
-var d = CSG.cylinder({ radius: 0.7, start: new CSG.Vector(0, -1, 0), end: new CSG.Vector(0, 1, 0) });
-var e = CSG.cylinder({ radius: 0.7, start: new CSG.Vector(0, 0, -1), end: new CSG.Vector(0, 0, 1) });
+var c = CSG.cylinder({ radius: 0.7, start: [-1, 0, 0], end: [1, 0, 0] });
+var d = CSG.cylinder({ radius: 0.7, start: [0, -1, 0], end: [0, 1, 0] });
+var e = CSG.cylinder({ radius: 0.7, start: [0, 0, -1], end: [0, 0, 1] });
 a.setColor(1, 0, 0);
 b.setColor(0, 0, 1);
 c.setColor(0, 1, 0);
