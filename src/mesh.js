@@ -407,12 +407,14 @@ Mesh.load = function(json, options) {
   options = options || {};
   if (!('coords' in options)) options.coords = !!json.coords;
   if (!('normals' in options)) options.normals = !!json.normals;
+  if (!('colors' in options)) options.colors = !!json.colors;
   if (!('triangles' in options)) options.triangles = !!json.triangles;
   if (!('lines' in options)) options.lines = !!json.lines;
   var mesh = new Mesh(options);
   mesh.vertices = json.vertices;
   if (mesh.coords) mesh.coords = json.coords;
   if (mesh.normals) mesh.normals = json.normals;
+  if (mesh.colors) mesh.colors = json.colors;
   if (mesh.triangles) mesh.triangles = json.triangles;
   if (mesh.lines) mesh.lines = json.lines;
   mesh.compile();
