@@ -20,7 +20,13 @@ computed using rasterization. That is what this example does.
 
 var angleX = 30;
 var angleY = 30;
-var gl = GL.create();
+var gl = GL.create({
+  // If we use hardware multisampling then there will be leaking around the
+  // edges of quads due to extrapolation. For more details see the article at
+  // http://www.opengl.org/pipeline/article/vol003_6/. These artifacts can be
+  // avoided by using centroid sampling except it isn't supported by WebGL.
+  antialias: false
+});
 if (!gl.getExtension('OES_texture_float')) {
   document.write('This demo requires the OES_texture_float extension to run');
   throw 'not supported';
