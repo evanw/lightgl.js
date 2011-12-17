@@ -1,0 +1,301 @@
+<!--
+
+This example dynamically generates an ambient occlusion lightmap on the GPU.
+Ambient occlusion refers to the shadows due to a uniformly lit hemisphere
+enclosing the model, which approximates the light arriving from the sky.
+Let this example run for a while for a perfectly smooth lightmap.
+
+Usually ambient occlusion is calculated for a given point in the scene by
+tracing rays outward in random directions from that point and making the point
+lighter if those rays don't intersect anything. This is inefficient because
+each ray is independent and uncorrelated. It is much more efficient if all
+sample rays in a pass are parallel because the intersections can then be
+computed using rasterization. That is what this example does.
+
+-->
+<!DOCTYPE html>
+<html><body>
+  <script src="../lightgl.js"></script>
+  <script>
+
+var angleX = 30;
+var angleY = 30;
+var gl = GL.create();
+if (!gl.getExtension('OES_texture_float')) {
+  document.write('This demo requires the OES_texture_float extension to run');
+  throw 'not supported';
+}
+
+var depthMap = new GL.Texture(1024, 1024, { format: gl.RED });
+var depthShader = new GL.Shader('\
+  varying vec4 pos;\
+  void main() {\
+    gl_Position = pos = gl_ModelViewProjectionMatrix * gl_Vertex;\
+  }\
+', '\
+  varying vec4 pos;\
+  void main() {\
+    float depth = pos.z / pos.w;\
+    gl_FragColor = vec4(depth * 0.5 + 0.5);\
+  }\
+');
+
+var shadowTestShader = new GL.Shader('\
+  uniform mat4 shadowMapMatrix;\
+  uniform vec3 light;\
+  attribute vec2 offsetCoord;\
+  attribute vec4 offsetPosition;\
+  varying vec4 coord;\
+  varying vec3 normal;\
+  \
+  void main() {\
+    normal = gl_Normal;\
+    vec4 pos = offsetPosition;\
+    \
+    /*\
+     * This is a hack that avoids leaking light immediately behind polygons by\
+     * darkening creases in front of polygons instead. It biases the position\
+     * forward toward the light to compensate for the bias away from the light\
+     * applied by the fragment shader. This is only necessary because we have\
+     * infinitely thin geometry and is not needed with the solid geometry\
+     * present in most scenes. I made this hack up and have not seen it before.\
+     */\
+    pos.xyz += normalize(cross(normal, cross(normal, light))) * 0.02;\
+    \
+    coord = shadowMapMatrix * (gl_ModelViewProjectionMatrix * pos);\
+    gl_Position = vec4(offsetCoord * 2.0 - 1.0, 0.0, 1.0);\
+  }\
+', '\
+  uniform float sampleCount;\
+  uniform sampler2D depthMap;\
+  uniform vec3 light;\
+  varying vec4 coord;\
+  varying vec3 normal;\
+  \
+  void main() {\
+    /* Run shadow test */\
+    const float bias = -0.0025;\
+    float depth = texture2D(depthMap, coord.xy / coord.w * 0.5 + 0.5).r;\
+    float shadow = (bias + coord.z / coord.w * 0.5 + 0.5 - depth > 0.0) ? 1.0 : 0.0;\
+    \
+    /* Points on polygons facing away from the light are always in shadow */\
+    float color = dot(normal, light) > 0.0 ? 1.0 - shadow : 0.0;\
+    gl_FragColor = vec4(vec3(color), 1.0 / (1.0 + sampleCount));\
+  }\
+');
+
+function QuadMesh(numQuads, texelsPerSide) {
+  this.size = Math.ceil(Math.sqrt(numQuads));
+  this.texelsPerSide = texelsPerSide;
+  this.mesh = new GL.Mesh({ normals: true, coords: true });
+  this.index = 0;
+  this.lightmapTexture = null;
+  this.bounds = null;
+  this.sampleCount = 0;
+
+  // Also need values offset by 0.5 texels to avoid seams between lightmap cells
+  this.mesh.addVertexBuffer('offsetCoords', 'offsetCoord');
+  this.mesh.addVertexBuffer('offsetPositions', 'offsetPosition');
+}
+
+// Add a quad given its four vertices and allocate space for it in the lightmap
+QuadMesh.prototype.addQuad = function(a, b, c, d) {
+  var half = 0.5 / this.texelsPerSide;
+
+  // Add vertices
+  this.mesh.vertices.push(a.toArray());
+  this.mesh.vertices.push(b.toArray());
+  this.mesh.vertices.push(c.toArray());
+  this.mesh.vertices.push(d.toArray());
+
+  // Add normal
+  var normal = b.subtract(a).cross(c.subtract(a)).unit().toArray();
+  this.mesh.normals.push(normal);
+  this.mesh.normals.push(normal);
+  this.mesh.normals.push(normal);
+  this.mesh.normals.push(normal);
+
+  // Add fake positions
+  function lerp(x, y) {
+    return a.multiply((1-x)*(1-y)).add(b.multiply(x*(1-y)))
+      .add(c.multiply((1-x)*y)).add(d.multiply(x*y)).toArray();
+  }
+  this.mesh.offsetPositions.push(lerp(-half, -half));
+  this.mesh.offsetPositions.push(lerp(1 + half, -half));
+  this.mesh.offsetPositions.push(lerp(-half, 1 + half));
+  this.mesh.offsetPositions.push(lerp(1 + half, 1 + half));
+
+  // Compute location of texture cell
+  var i = this.index++;
+  var s = i % this.size;
+  var t = (i - s) / this.size;
+
+  // Coordinates that are in the center of border texels (to avoid leaking)
+  var s0 = (s + half) / this.size;
+  var t0 = (t + half) / this.size;
+  var s1 = (s + 1 - half) / this.size;
+  var t1 = (t + 1 - half) / this.size;
+  this.mesh.coords.push([s0, t0]);
+  this.mesh.coords.push([s1, t0]);
+  this.mesh.coords.push([s0, t1]);
+  this.mesh.coords.push([s1, t1]);
+
+  // Coordinates that are on the edge of border texels (to avoid cracks when rendering)
+  var rs0 = s / this.size;
+  var rt0 = t / this.size;
+  var rs1 = (s + 1) / this.size;
+  var rt1 = (t + 1) / this.size;
+  this.mesh.offsetCoords.push([rs0, rt0]);
+  this.mesh.offsetCoords.push([rs1, rt0]);
+  this.mesh.offsetCoords.push([rs0, rt1]);
+  this.mesh.offsetCoords.push([rs1, rt1]);
+
+  // A quad is two triangles
+  this.mesh.triangles.push([4 * i, 4 * i + 1, 4 * i + 3]);
+  this.mesh.triangles.push([4 * i, 4 * i + 3, 4 * i + 2]);
+};
+
+QuadMesh.prototype.addDoubleQuad = function(a, b, c, d) {
+  // Need a separate lightmap for each side of the quad
+  this.addQuad(a, b, c, d);
+  this.addQuad(a, c, b, d);
+};
+
+QuadMesh.prototype.compile = function() {
+  // Finalize mesh
+  this.mesh.compile();
+  this.bounds = this.mesh.getBoundingSphere();
+
+  // Create textures
+  var size = this.size * this.texelsPerSide;
+  this.lightmapTexture = new GL.Texture(size, size, { format: gl.RED, type: gl.FLOAT });
+};
+
+QuadMesh.prototype.drawShadow = function(dir) {
+  // Construct a camera looking from the light toward the object
+  var r = this.bounds.radius, c = this.bounds.center;
+  gl.matrixMode(gl.PROJECTION);
+  gl.pushMatrix();
+  gl.loadIdentity();
+  gl.ortho(-r, r, -r, r, -r, r);
+  gl.matrixMode(gl.MODELVIEW);
+  gl.pushMatrix();
+  gl.loadIdentity();
+  var at = c.subtract(dir);
+  var useY = (dir.max() != dir.y);
+  var up = new GL.Vector(!useY, useY, 0).cross(dir);
+  gl.lookAt(c.x, c.y, c.z, at.x, at.y, at.z, up.x, up.y, up.z);
+
+  // Render the object viewed from the light using a shader that returns the fragment depth
+  var mesh = this.mesh;
+  var shadowMapMatrix = gl.projectionMatrix.multiply(gl.modelviewMatrix);
+  depthMap.drawTo(function() {
+    gl.clearColor(1, 1, 1, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    depthShader.draw(mesh);
+  });
+
+  // Reset the transform
+  gl.matrixMode(gl.PROJECTION);
+  gl.popMatrix();
+  gl.matrixMode(gl.MODELVIEW);
+  gl.popMatrix();
+
+  // Run the shadow test for each texel in the lightmap and
+  // accumulate that onto the existing lightmap contents
+  var sampleCount = this.sampleCount++;
+  depthMap.bind();
+  this.lightmapTexture.drawTo(function() {
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    shadowTestShader.uniforms({
+      shadowMapMatrix: shadowMapMatrix.multiply(gl.projectionMatrix.multiply(gl.modelviewMatrix).inverse()),
+      sampleCount: sampleCount,
+      light: dir
+    }).draw(mesh);
+    gl.disable(gl.BLEND);
+  });
+  depthMap.unbind();
+};
+
+// Make a mesh of quads
+var numArcQuads = 32;
+var groundTilesPerSide = 5;
+var quadMesh = new QuadMesh((numArcQuads + groundTilesPerSide * groundTilesPerSide) * 2, 64);
+// Arc of randomly oriented quads
+for (var i = 0; i < numArcQuads; i++) {
+  var r = 0.3;
+  var center = GL.Vector.fromAngles(0, ((i + Math.random()) / numArcQuads) * Math.PI);
+  var a = GL.Vector.randomDirection().multiply(r);
+  var b = GL.Vector.randomDirection().cross(a).unit().multiply(r);
+  quadMesh.addDoubleQuad(
+    center.subtract(a).subtract(b),
+    center.subtract(a).add(b),
+    center.add(a).subtract(b),
+    center.add(a).add(b)
+  );
+}
+// Plane of quads
+for (var x = 0; x < groundTilesPerSide; x++) {
+  for (var z = 0; z < groundTilesPerSide; z++) {
+    var dx = x - groundTilesPerSide / 2;
+    var dz = z - groundTilesPerSide / 2;
+    quadMesh.addDoubleQuad(
+      new GL.Vector(dx, 0, dz),
+      new GL.Vector(dx, 0, dz + 1),
+      new GL.Vector(dx + 1, 0, dz),
+      new GL.Vector(dx + 1, 0, dz + 1)
+    );
+  }
+}
+quadMesh.compile();
+
+// The mesh will be drawn with texture mapping
+var mesh = quadMesh.mesh;
+var textureMapShader = new GL.Shader('\
+  varying vec2 coord;\
+  void main() {\
+    coord = gl_TexCoord.st;\
+    gl_Position = ftransform();\
+  }\
+', '\
+  uniform sampler2D texture;\
+  varying vec2 coord;\
+  void main() {\
+    gl_FragColor = texture2D(texture, coord);\
+  }\
+');
+
+gl.onmousemove = function(e) {
+  if (e.dragging) {
+    angleY += e.deltaX;
+    angleX += e.deltaY;
+    angleX = Math.max(-90, Math.min(90, angleX));
+  }
+};
+
+gl.ondraw = function() {
+  gl.clearColor(0.9, 0.9, 0.9, 1);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.loadIdentity();
+  gl.translate(0, 0, -4);
+  gl.rotate(angleX, 1, 0, 0);
+  gl.rotate(angleY, 0, 1, 0);
+  gl.translate(0, -0.25, 0);
+
+  // Accumulate another shadow from a random point on the sky hemisphere
+  var dir = GL.Vector.randomDirection();
+  quadMesh.drawShadow(dir.y < 0 ? dir.negative() : dir);
+
+  // Draw the mesh with the ambient occlusion so far
+  quadMesh.lightmapTexture.bind();
+  textureMapShader.draw(mesh);
+};
+
+gl.fullscreen();
+gl.animate();
+gl.enable(gl.CULL_FACE);
+gl.enable(gl.DEPTH_TEST);
+
+  </script>
+</body></html>

@@ -45,7 +45,7 @@ var displayShader = new GL.Shader('\
   varying vec3 toLight;\
   void main() {\
     toLight = light - (gl_ModelViewMatrix * gl_Vertex).xyz;\
-    normal = (gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz;\
+    normal = gl_NormalMatrix * gl_Normal;\
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\
     coord = shadowMapMatrix * gl_Position;\
   }\

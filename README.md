@@ -76,3 +76,4 @@ Available examples:
 * [Shadow map from a point light](http://evanw.github.com/lightgl.js/tests/shadowmap.html)
 * [Realtime raytracing](http://evanw.github.com/lightgl.js/tests/raytracing.html)
 * [Constructive solid geometry](http://evanw.github.com/lightgl.js/tests/csg.html)
+* [GPU lightmap generation](http://evanw.github.com/lightgl.js/tests/gpulightmap.html)
