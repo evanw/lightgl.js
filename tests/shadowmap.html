@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html><body>
+  <div style="position:absolute;width:100%;z-index:1;font:14px Arial;color:white;text-align:center;">Press S for bounding sphere and B for bounding box</div>
   <script src="../lightgl.js"></script>
   <script src="cessna.js"></script>
   <script>
@@ -7,16 +8,19 @@
 var time = 0;
 var angleX = 20;
 var angleY = 20;
+var useBoundingSphere = true;
 var gl = GL.create();
 var mesh = GL.Mesh.load(cessna);
+var cube = GL.Mesh.cube().computeWireframe();
 var sphere = GL.Mesh.sphere({ detail: 3 }).computeWireframe();
 var plane = GL.Mesh.plane({ normals: true, coords: true }).transform(GL.Matrix.scale(300, 300, 1));
 var depthMap = new GL.Texture(1024, 1024, { format: gl.RGB });
 var texturePlane = GL.Mesh.plane({ coords: true });
 var boundingSphere = mesh.getBoundingSphere();
+var boundingBox = mesh.getAABB();
 var colorShader = new GL.Shader('\
   uniform vec3 center;\
-  uniform float radius;\
+  uniform vec3 radius;\
   void main() {\
     gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.xyz * radius + center, 1.0);\
   }\
@@ -98,21 +102,68 @@ gl.onmousemove = function(e) {
   }
 };
 
+function cameraForBoundingSphere(light, boundingSphere) {
+  var distance = boundingSphere.center.subtract(light).length();
+  var angle = 180 - 2 * Math.acos(boundingSphere.radius / distance) * 180 / Math.PI;
+  gl.matrixMode(gl.PROJECTION);
+  gl.loadIdentity();
+  gl.perspective(angle, 1, distance - boundingSphere.radius, distance + boundingSphere.radius);
+  gl.matrixMode(gl.MODELVIEW);
+  gl.loadIdentity();
+  gl.lookAt(light.x, light.y, light.z, boundingSphere.center.x, boundingSphere.center.y, boundingSphere.center.z, 0, 1, 0);
+}
+
+function cameraForBoundingBox(light, boundingBox) {
+  var center = boundingBox.min.add(boundingBox.max).divide(2);
+  var axisZ = center.subtract(light).unit();
+  var axisX = axisZ.cross(new GL.Vector(0, 1, 0)).unit();
+  var axisY = axisX.cross(axisZ);
+  var near = Number.MAX_VALUE;
+  var far = -Number.MAX_VALUE;
+  var slopeNegX = 0;
+  var slopePosX = 0;
+  var slopeNegY = 0;
+  var slopePosY = 0;
+
+  // Loop over all the points and find the maximum slope for each direction.
+  // Incidentally, this algorithm works for convex hulls of any shape and will
+  // return the optimal bounding frustum for every hull.
+  for (var i = 0; i < 8; i++) {
+    point = GL.Vector.lerp(boundingBox.min, boundingBox.max, new GL.Vector(!!(i & 1), !!(i & 2), !!(i & 4)));
+    var toPoint = point.subtract(light);
+    var dotZ = toPoint.dot(axisZ);
+    var slopeX = toPoint.dot(axisX) / dotZ;
+    var slopeY = toPoint.dot(axisY) / dotZ;
+    slopeNegX = Math.min(slopeNegX, slopeX);
+    slopeNegY = Math.min(slopeNegY, slopeY);
+    slopePosX = Math.max(slopePosX, slopeX);
+    slopePosY = Math.max(slopePosY, slopeY);
+    near = Math.min(near, dotZ);
+    far = Math.max(far, dotZ);
+  }
+
+  // Need to fit an oblique view frustum to get optimal bounds
+  gl.matrixMode(gl.PROJECTION);
+  gl.loadIdentity();
+  gl.frustum(slopeNegX * near, slopePosX * near, slopeNegY * near, slopePosY * near, near, far);
+  gl.matrixMode(gl.MODELVIEW);
+  gl.loadIdentity();
+  gl.lookAt(light.x, light.y, light.z, center.x, center.y, center.z, 0, 1, 0);
+}
+
 gl.ondraw = function() {
   // Move the light around
   var light = new GL.Vector(100 * Math.sin(time * 0.2), 25, 20 * Math.cos(time * 0.2));
 
   // Construct a camera looking from the light toward the object. The view
-  // frustum is fit so it tightly encloses the bounding sphere of the object,
-  // to make best use of shadow map resolution. A frustum is a pyramid shape
-  // with the apex chopped off.
-  gl.matrixMode(gl.PROJECTION);
-  gl.loadIdentity();
-  var distance = boundingSphere.center.subtract(light).length();
-  gl.perspective(180 - 2 * Math.acos(boundingSphere.radius / distance) * 180 / Math.PI, 1, distance - boundingSphere.radius, distance + boundingSphere.radius);
-  gl.matrixMode(gl.MODELVIEW);
-  gl.loadIdentity();
-  gl.lookAt(light.x, light.y, light.z, boundingSphere.center.x, boundingSphere.center.y, boundingSphere.center.z, 0, 1, 0);
+  // frustum is fit so it tightly encloses the bounding volume of the object
+  // (sphere or box) to make best use of shadow map resolution. A frustum is
+  // a pyramid shape with the apex chopped off.
+  if (useBoundingSphere) {
+    cameraForBoundingSphere(light, boundingSphere);
+  } else {
+    cameraForBoundingBox(light, boundingBox);
+  }
 
   // Render the object viewed from the light using a shader that returns the
   // fragment depth.
@@ -167,11 +218,18 @@ gl.ondraw = function() {
   }
   gl.end();
 
-  // Draw bounding sphere
-  colorShader.uniforms({
-    center: boundingSphere.center,
-    radius: boundingSphere.radius
-  }).draw(sphere, gl.LINES);
+  // Draw the bounding volume
+  if (useBoundingSphere) {
+    colorShader.uniforms({
+      center: boundingSphere.center,
+      radius: new GL.Vector(boundingSphere.radius, boundingSphere.radius, boundingSphere.radius)
+    }).draw(sphere, gl.LINES);
+  } else {
+    colorShader.uniforms({
+      center: boundingBox.min.add(boundingBox.max).divide(2),
+      radius: boundingBox.max.subtract(boundingBox.min).divide(2)
+    }).draw(cube, gl.LINES);
+  }
 
   // Draw mesh
   depthMap.bind();
@@ -190,6 +248,14 @@ gl.ondraw = function() {
   gl.viewport(10, 10, 10 + 256, 10 + 256);
   textureShader.draw(texturePlane);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+};
+
+document.onkeydown = function(e) {
+  if (e.which == 'S'.charCodeAt(0)) {
+    useBoundingSphere = true;
+  } else if (e.which == 'B'.charCodeAt(0)) {
+    useBoundingSphere = false;
+  }
 };
 
 gl.fullscreen();
