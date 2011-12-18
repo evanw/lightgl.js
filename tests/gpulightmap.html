@@ -68,7 +68,7 @@ var shadowTestShader = new GL.Shader('\
      */\
     pos.xyz += normalize(cross(normal, cross(normal, light))) * 0.02;\
     \
-    coord = shadowMapMatrix * (gl_ModelViewProjectionMatrix * pos);\
+    coord = shadowMapMatrix * pos;\
     gl_Position = vec4(offsetCoord * 2.0 - 1.0, 0.0, 1.0);\
   }\
 ', '\
@@ -215,7 +215,7 @@ QuadMesh.prototype.drawShadow = function(dir) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     shadowTestShader.uniforms({
-      shadowMapMatrix: shadowMapMatrix.multiply(gl.projectionMatrix.multiply(gl.modelviewMatrix).inverse()),
+      shadowMapMatrix: shadowMapMatrix,
       sampleCount: sampleCount,
       light: dir
     }).draw(mesh);
@@ -280,6 +280,8 @@ gl.onmousemove = function(e) {
   }
 };
 
+var flip = false;
+
 gl.ondraw = function() {
   gl.clearColor(0.9, 0.9, 0.9, 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -289,8 +291,11 @@ gl.ondraw = function() {
   gl.rotate(angleY, 0, 1, 0);
   gl.translate(0, -0.25, 0);
 
-  // Accumulate another shadow from a random point on the sky hemisphere
+  // Alternate between a shadow from a random point on the sky hemisphere
+  // and a random point near the light (creates a soft shadow)
   var dir = GL.Vector.randomDirection();
+  flip = !flip;
+  if (flip) dir = new GL.Vector(1, 1, 1).add(dir.multiply(0.3 * Math.sqrt(Math.random()))).unit();
   quadMesh.drawShadow(dir.y < 0 ? dir.negative() : dir);
 
   // Draw the mesh with the ambient occlusion so far
