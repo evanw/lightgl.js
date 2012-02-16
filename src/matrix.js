@@ -1,15 +1,15 @@
-// Represents a 4x4 matrix using Float32Arrays when available. Matrix
-// operations can either be done using convenient methods that return a new
-// matrix for the result, or optimized methods that store the result in an
-// existing matrix to avoid generating garbage.
+// Represents a 4x4 matrix stored in row-major order that uses Float32Arrays
+// when available. Matrix operations can either be done using convenient
+// methods that return a new matrix for the result or optimized methods
+// that store the result in an existing matrix to avoid generating garbage.
 
 var hasFloat32Array = (typeof Float32Array != 'undefined');
 
 // ### new GL.Matrix([elements])
 // 
-// This constructor takes 16 arguments, which can be passed individually, as
-// a list, or even as four lists, one for each row. If the arguments are
-// omitted then the identity matrix is constructed instead.
+// This constructor takes 16 arguments in row-major order, which can be passed
+// individually, as a list, or even as four lists, one for each row. If the
+// arguments are omitted then the identity matrix is constructed instead.
 function Matrix() {
   var m = Array.prototype.concat.apply([], arguments);
   if (!m.length) {
