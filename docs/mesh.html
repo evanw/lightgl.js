@@ -60,7 +60,7 @@ the index of <code>obj</code> in <code>unique</code>.</p>             </td>     
 <p>Provides a simple method of uploading data to a GPU buffer. Example usage:</p>
 
 <pre><code>var vertices = new GL.Buffer(gl.ARRAY_BUFFER, Float32Array);
-var indices = new GL.Buffer(gl.ELEMENT_ARRAY_BUFFER, Int16Array);
+var indices = new GL.Buffer(gl.ELEMENT_ARRAY_BUFFER, Uint16Array);
 vertices.data = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]];
 indices.data = [[0, 1, 2], [2, 1, 3]];
 vertices.compile();
@@ -129,7 +129,7 @@ and map it to the attribute called <code>attribute</code> in all shaders that dr
   <span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <h3>.addIndexBuffer(name)</h3>
 
 <p>Add a new index buffer with a list as a property called <code>name</code> on this object.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nx">addIndexBuffer</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">indexBuffers</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">ELEMENT_ARRAY_BUFFER</span><span class="p">,</span> <span class="nx">Int16Array</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">indexBuffers</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">ELEMENT_ARRAY_BUFFER</span><span class="p">,</span> <span class="nx">Uint16Array</span><span class="p">);</span>
     <span class="k">this</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[];</span>
   <span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <h3>.compile()</h3>
 
