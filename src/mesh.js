@@ -66,7 +66,7 @@ Indexer.prototype = {
 // Provides a simple method of uploading data to a GPU buffer. Example usage:
 // 
 //     var vertices = new GL.Buffer(gl.ARRAY_BUFFER, Float32Array);
-//     var indices = new GL.Buffer(gl.ELEMENT_ARRAY_BUFFER, Int16Array);
+//     var indices = new GL.Buffer(gl.ELEMENT_ARRAY_BUFFER, Uint16Array);
 //     vertices.data = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]];
 //     indices.data = [[0, 1, 2], [2, 1, 3]];
 //     vertices.compile();
@@ -146,7 +146,7 @@ Mesh.prototype = {
   // 
   // Add a new index buffer with a list as a property called `name` on this object.
   addIndexBuffer: function(name) {
-    var buffer = this.indexBuffers[name] = new Buffer(gl.ELEMENT_ARRAY_BUFFER, Int16Array);
+    var buffer = this.indexBuffers[name] = new Buffer(gl.ELEMENT_ARRAY_BUFFER, Uint16Array);
     this[name] = [];
   },
 
