@@ -223,7 +223,23 @@ function addEventListeners() {
     return false;
   }
   function augment(original) {
-    e = Object.create(original);
+    // Make a copy of original, a native `MouseEvent`, so we can overwrite
+    // WebKit's non-standard read-only `x` and `y` properties (which are just
+    // duplicates of `pageX` and `pageY`). We can't just use
+    // `Object.create(original)` because some `MouseEvent` functions must be
+    // called in the context of the original event object.
+    var e = {};
+    for (var name in original) {
+      if (typeof original[name] == 'function') {
+        e[name] = (function(callback) {
+          return function() {
+            callback.call(original, arguments);
+          };
+        })(original[name]);
+      } else {
+        e[name] = original[name];
+      }
+    }
     e.original = original;
     e.x = e.pageX;
     e.y = e.pageY;
