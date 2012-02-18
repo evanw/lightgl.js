@@ -154,22 +154,18 @@ function addImmediateMode() {
       uniform float pointSize;\
       varying vec4 color;\
       varying vec4 coord;\
-      varying vec2 pixel;\
       void main() {\
         color = gl_Color;\
         coord = gl_TexCoord;\
         gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\
-        pixel = gl_Position.xy / gl_Position.w * 0.5 + 0.5;\
         gl_PointSize = pointSize;\
       }\
     ', '\
       uniform sampler2D texture;\
       uniform float pointSize;\
       uniform bool useTexture;\
-      uniform vec2 windowSize;\
       varying vec4 color;\
       varying vec4 coord;\
-      varying vec2 pixel;\
       void main() {\
         gl_FragColor = color;\
         if (useTexture) gl_FragColor *= texture2D(texture, coord.xy);\
@@ -201,7 +197,6 @@ function addImmediateMode() {
     if (immediateMode.mode == -1) throw 'mismatched gl.begin() and gl.end() calls';
     immediateMode.mesh.compile();
     immediateMode.shader.uniforms({
-      windowSize: [gl.canvas.width, gl.canvas.height],
       useTexture: !!gl.getParameter(gl.TEXTURE_BINDING_2D)
     }).draw(immediateMode.mesh, immediateMode.mode);
     immediateMode.mode = -1;
@@ -381,11 +376,11 @@ function addOtherMethods() {
       window.mozRequestAnimationFrame ||
       window.webkitRequestAnimationFrame ||
       function(callback) { setTimeout(callback, 1000 / 60); };
-    var time = new Date();
+    var time = new Date().getTime();
     var context = gl;
     function update() {
       gl = context;
-      var now = new Date();
+      var now = new Date().getTime();
       if (gl.onupdate) gl.onupdate((now - time) / 1000);
       if (gl.ondraw) gl.ondraw();
       post(update);

@@ -111,6 +111,7 @@ function Shader(vertexSource, fragmentSource) {
     throw 'link error: ' + gl.getProgramInfoLog(this.program);
   }
   this.attributes = {};
+  this.uniformLocations = {};
 
   // Sampler uniforms need to be uploaded using `gl.uniform1i()` instead of `gl.uniform1f()`.
   // To do this automatically, we detect and remember all uniform samplers in the source code.
@@ -143,8 +144,9 @@ Shader.prototype = {
     gl.useProgram(this.program);
 
     for (var name in uniforms) {
-      var location = gl.getUniformLocation(this.program, name);
+      var location = this.uniformLocations[name] || gl.getUniformLocation(this.program, name);
       if (!location) continue;
+      this.uniformLocations[name] = location;
       var value = uniforms[name];
       if (value instanceof Vector) {
         value = [value.x, value.y, value.z];
