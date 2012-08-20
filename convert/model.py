@@ -74,3 +74,7 @@ class Model:
             c.normal += n
         for v in self.vertices:
             v.normal = v.normal.unit()
+
+    def scale(self, scale):
+        for v in self.vertices:
+            v.pos = v.pos * scale

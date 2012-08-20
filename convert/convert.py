@@ -15,6 +15,7 @@ if __name__ == '__main__':
     # parse command line
     help = 'one of: ' + ', '.join(formats)
     parser = OptionParser('usage: [options] input_file output_file')
+    parser.add_option('--scale', dest='scale', help='scales the model')
     parser.add_option('--center', action='store_true', help='centers the model above the origin')
     parser.add_option('--compute_normals', action='store_true', help='computes smoothed normals')
     parser.add_option('--in', dest='input_format', help=help)
@@ -52,6 +53,9 @@ if __name__ == '__main__':
         if options.compute_normals:
             print 'computing normals'
             model.compute_normals()
+        if options.scale:
+			print 'scaling model'
+			model.scale(float(options.scale))
 
         # save model
         out_file = open(out_path, 'wb')
