@@ -228,7 +228,7 @@ function addEventListeners() {
       if (typeof original[name] == 'function') {
         e[name] = (function(callback) {
           return function() {
-            callback.call(original, arguments);
+            callback.apply(original, arguments);
           };
         })(original[name]);
       } else {
