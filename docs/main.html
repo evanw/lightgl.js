@@ -191,9 +191,10 @@ because it's only meant for quick debugging tasks.</p>             </td>        
 augmented event object. The event object also has the properties <code>x</code>, <code>y</code>,
 <code>deltaX</code>, <code>deltaY</code>, and <code>dragging</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">function</span> <span class="nx">addEventListeners</span><span class="p">()</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">context</span> <span class="o">=</span> <span class="nx">gl</span><span class="p">,</span> <span class="nx">oldX</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">oldY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">buttons</span> <span class="o">=</span> <span class="p">{},</span> <span class="nx">hasOld</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="kd">var</span> <span class="nx">has</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">;</span>
   <span class="kd">function</span> <span class="nx">isDragging</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">b</span> <span class="k">in</span> <span class="nx">buttons</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">buttons</span><span class="p">[</span><span class="nx">b</span><span class="p">])</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">has</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">buttons</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">buttons</span><span class="p">[</span><span class="nx">b</span><span class="p">])</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
   <span class="p">}</span>
@@ -272,11 +273,16 @@ called in the context of the original event object.</p>             </td>       
   <span class="kd">function</span> <span class="nx">reset</span><span class="p">()</span> <span class="p">{</span>
     <span class="nx">hasOld</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
   <span class="p">}</span>
+  <span class="kd">function</span> <span class="nx">resetAll</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">buttons</span> <span class="o">=</span> <span class="p">{};</span>
+    <span class="nx">hasOld</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
   <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mousedown&#39;</span><span class="p">,</span> <span class="nx">mousedown</span><span class="p">);</span>
   <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mousemove&#39;</span><span class="p">,</span> <span class="nx">mousemove</span><span class="p">);</span>
   <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mouseup&#39;</span><span class="p">,</span> <span class="nx">mouseup</span><span class="p">);</span>
   <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mouseover&#39;</span><span class="p">,</span> <span class="nx">reset</span><span class="p">);</span>
   <span class="nx">on</span><span class="p">(</span><span class="nx">gl</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="s1">&#39;mouseout&#39;</span><span class="p">,</span> <span class="nx">reset</span><span class="p">);</span>
+  <span class="nx">on</span><span class="p">(</span><span class="nb">document</span><span class="p">,</span> <span class="s1">&#39;contextmenu&#39;</span><span class="p">,</span> <span class="nx">resetAll</span><span class="p">);</span>
 <span class="p">}</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <h3>Automatic keyboard state</h3>
 
 <p>The current keyboard state is stored in <code>GL.keys</code>, a map of integer key
