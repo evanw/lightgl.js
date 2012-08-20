@@ -25,6 +25,10 @@ function regexMap(regex, text, callback) {
   }
 }
 
+// Non-standard names beginning with `gl_` must be mangled because they will
+// otherwise cause a compiler error.
+var LIGHTGL_PREFIX = 'LIGHTGL';
+
 // ### new GL.Shader(vertexSource, fragmentSource)
 // 
 // Compiles a shader program using the provided vertex and fragment shaders.
@@ -68,10 +72,10 @@ function Shader(vertexSource, fragmentSource) {
     var name = groups[1];
     if (source.indexOf(name) != -1) {
       var capitalLetters = name.replace(/[a-z_]/g, '');
-      usedMatrices[capitalLetters] = '_' + name;
+      usedMatrices[capitalLetters] = LIGHTGL_PREFIX + name;
     }
   });
-  if (source.indexOf('ftransform') != -1) usedMatrices.MVPM = '_gl_ModelViewProjectionMatrix';
+  if (source.indexOf('ftransform') != -1) usedMatrices.MVPM = LIGHTGL_PREFIX + 'gl_ModelViewProjectionMatrix';
   this.usedMatrices = usedMatrices;
 
   // The `gl_` prefix must be substituted for something else to avoid compile
@@ -84,7 +88,7 @@ function Shader(vertexSource, fragmentSource) {
     source = match ? match[1] + header + source.substr(match[1].length) : header + source;
     regexMap(/\bgl_\w+\b/g, header, function(result) {
       if (!(result in replaced)) {
-        source = source.replace(new RegExp('\\b' + result + '\\b', 'g'), '_' + result);
+        source = source.replace(new RegExp('\\b' + result + '\\b', 'g'), LIGHTGL_PREFIX + result);
         replaced[result] = true;
       }
     });
@@ -230,7 +234,7 @@ Shader.prototype = {
     for (var attribute in vertexBuffers) {
       var buffer = vertexBuffers[attribute];
       var location = this.attributes[attribute] ||
-        gl.getAttribLocation(this.program, attribute.replace(/^gl_/, '_gl_'));
+        gl.getAttribLocation(this.program, attribute.replace(/^(gl_.*)$/, LIGHTGL_PREFIX + '$1'));
       if (location == -1 || !buffer.buffer) continue;
       this.attributes[attribute] = location;
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer.buffer);
