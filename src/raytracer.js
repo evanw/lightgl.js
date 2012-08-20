@@ -128,7 +128,7 @@ Raytracer.hitTestTriangle = function(origin, ray, a, b, c) {
   var ab = b.subtract(a);
   var ac = c.subtract(a);
   var normal = ab.cross(ac).unit();
-  var t = normal.dot(a.subtract(origin)).divide(normal.dot(ray));
+  var t = normal.dot(a.subtract(origin)) / normal.dot(ray);
 
   if (t > 0) {
     var hit = origin.add(ray.multiply(t));
