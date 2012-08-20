@@ -211,9 +211,10 @@ function addImmediateMode() {
 // `deltaX`, `deltaY`, and `dragging`.
 function addEventListeners() {
   var context = gl, oldX = 0, oldY = 0, buttons = {}, hasOld = false;
+  var has = Object.prototype.hasOwnProperty;
   function isDragging() {
     for (var b in buttons) {
-      if (buttons[b]) return true;
+      if (has.call(buttons, b) && buttons[b]) return true;
     }
     return false;
   }
@@ -298,11 +299,16 @@ function addEventListeners() {
   function reset() {
     hasOld = false;
   }
+  function resetAll() {
+    buttons = {};
+    hasOld = false;
+  }
   on(gl.canvas, 'mousedown', mousedown);
   on(gl.canvas, 'mousemove', mousemove);
   on(gl.canvas, 'mouseup', mouseup);
   on(gl.canvas, 'mouseover', reset);
   on(gl.canvas, 'mouseout', reset);
+  on(document, 'contextmenu', resetAll);
 }
 
 // ### Automatic keyboard state
