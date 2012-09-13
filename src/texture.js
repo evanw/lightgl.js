@@ -4,7 +4,7 @@
 //
 // The arguments `width` and `height` give the size of the texture in texels.
 // WebGL texture dimensions must be powers of two unless `filter` is set to
-// either `gl.NEAREST` or `gl.REPEAT` and `wrap` is set to `gl.CLAMP_TO_EDGE`
+// either `gl.NEAREST` or `gl.LINEAR` and `wrap` is set to `gl.CLAMP_TO_EDGE`
 // (which they are by default).
 //
 // Texture parameters can be passed in via the `options` argument.
