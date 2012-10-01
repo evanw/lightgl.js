@@ -10,8 +10,8 @@ var GL = {
   create: function(options) {
     options = options || {};
     var canvas = document.createElement('canvas');
-    canvas.width = 800;
-    canvas.height = 600;
+    canvas.width = options.width || 800;
+    canvas.height = options.height || 600;
     if (!('alpha' in options)) options.alpha = false;
     try { gl = canvas.getContext('webgl', options); } catch (e) {}
     try { gl = gl || canvas.getContext('experimental-webgl', options); } catch (e) {}
