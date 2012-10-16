@@ -4,14 +4,14 @@ var gl;
 var GL = {
   // ### Initialization
   // 
-  // `GL.create()` creates a new WebGL context and augments it with more
-  // methods. The alpha channel is disabled by default because it usually causes
-  // unintended transparencies in the canvas.
+  // `GL.create()` creates a new WebGL context and augments it with
+  // more methods. Uses the HTML canvas given in 'options' or creates
+  // a new one if necessary. The alpha channel is disabled by default
+  // because it usually causes unintended transparencies in the
+  // canvas.
   create: function(options) {
     options = options || {};
-    var canvas = document.createElement('canvas');
-    canvas.width = options.width || 800;
-    canvas.height = options.height || 600;
+    var canvas = options.canvas || document.createElement('canvas');
     if (!('alpha' in options)) options.alpha = false;
     try { gl = canvas.getContext('webgl', options); } catch (e) {}
     try { gl = gl || canvas.getContext('experimental-webgl', options); } catch (e) {}
