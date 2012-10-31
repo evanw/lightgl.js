@@ -444,6 +444,7 @@ function addOtherMethods() {
           options.near || 0.1, options.far || 1000);
         gl.matrixMode(gl.MODELVIEW);
       }
+      if (gl.onresize) gl.onresize();
       if (gl.ondraw) gl.ondraw();
     }
     on(window, 'resize', resize);
