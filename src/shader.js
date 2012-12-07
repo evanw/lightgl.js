@@ -289,8 +289,8 @@ Shader.fromURL = function(vsURL, fsURL) {
 
 Shader.from = function(vsURLorID, fsURLorID) {
   try {
-    return Shader.fromURL(vsURLorID, fsURLorID);
-  } catch (e) {
     return new Shader(vsURLorID, fsURLorID);
+  } catch (e) {
+    return Shader.fromURL(vsURLorID, fsURLorID);
   }
-}
+};
