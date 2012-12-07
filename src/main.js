@@ -215,6 +215,7 @@ function addImmediateMode() {
 // augmented event object. The event object also has the properties `x`, `y`,
 // `deltaX`, `deltaY`, and `dragging`.
 function addEventListeners() {
+
   var context = gl, oldX = 0, oldY = 0, buttons = {}, hasOld = false;
   var has = Object.prototype.hasOwnProperty;
   function isDragging() {
@@ -223,6 +224,7 @@ function addEventListeners() {
     }
     return false;
   }
+
   function augment(original) {
     // Make a copy of original, a native `MouseEvent`, so we can overwrite
     // WebKit's non-standard read-only `x` and `y` properties (which are just
@@ -267,6 +269,53 @@ function addEventListeners() {
     };
     return e;
   }
+
+  function augmentTouchEvent(original) {
+    var e = {};
+    for (var name in original) {
+      if (typeof original[name] == 'function') {
+        e[name] = (function(callback) {
+          return function() {
+            callback.apply(original, arguments);
+          };
+        })(original[name]);
+      } else {
+        e[name] = original[name];
+      }
+    }
+    e.original = original;
+
+    if (e.targetTouches.length > 0) {
+      var touch = e.targetTouches[0];
+      e.x = touch.pageX;
+      e.y = touch.pageY;
+
+      for (var obj = gl.canvas; obj; obj = obj.offsetParent) {
+        e.x -= obj.offsetLeft;
+        e.y -= obj.offsetTop;
+      }
+      if (hasOld) {
+        e.deltaX = e.x - oldX;
+        e.deltaY = e.y - oldY;
+      } else {
+        e.deltaX = 0;
+        e.deltaY = 0;
+        hasOld = true;
+      }
+      oldX = e.x;
+      oldY = e.y;
+      e.dragging = true;
+    }
+
+    e.preventDefault = function() {
+      e.original.preventDefault();
+    };
+    e.stopPropagation = function() {
+      e.original.stopPropagation();
+    };
+    return e;
+  }
+
   function mousedown(e) {
     gl = context;
     if (!isDragging()) {
@@ -281,12 +330,14 @@ function addEventListeners() {
     if (gl.onmousedown) gl.onmousedown(e);
     e.preventDefault();
   }
+
   function mousemove(e) {
     gl = context;
     e = augment(e);
     if (gl.onmousemove) gl.onmousemove(e);
     e.preventDefault();
   }
+
   function mouseup(e) {
     gl = context;
     buttons[e.which] = false;
@@ -301,19 +352,61 @@ function addEventListeners() {
     if (gl.onmouseup) gl.onmouseup(e);
     e.preventDefault();
   }
+
   function mousewheel(e) {
     gl = context;
     e = augment(e);
     if (gl.onmousewheel) gl.onmousewheel(e);
     e.preventDefault();
   }
+
+  function touchstart(e) {
+    resetAll();
+    // Expand the event handlers to the document to handle dragging off canvas.
+    on(document, 'touchmove', touchmove);
+    on(document, 'touchend', touchend);
+    off(gl.canvas, 'touchmove', touchmove);
+    off(gl.canvas, 'touchend', touchend);
+    gl = context;
+    e = augmentTouchEvent(e);
+    if (gl.ontouchstart) gl.ontouchstart(e);
+    e.preventDefault();
+  }
+
+  function touchmove(e) {
+    gl = context;
+    if (e.targetTouches.length === 0) {
+      touchend(e);
+    }
+    e = augmentTouchEvent(e);
+    if (gl.ontouchmove) gl.ontouchmove(e);
+    e.preventDefault();
+  }
+
+  function touchend(e) {
+    // Shrink the event handlers back to the canvas when dragging ends.
+    off(document, 'touchmove', touchmove);
+    off(document, 'touchend', touchend);
+    on(gl.canvas, 'touchmove', touchmove);
+    on(gl.canvas, 'touchend', touchend);
+    gl = context;
+    e = augmentTouchEvent(e);
+    if (gl.ontouchend) gl.ontouchend(e);
+    e.preventDefault();
+  }
+
   function reset() {
     hasOld = false;
   }
+
   function resetAll() {
     buttons = {};
     hasOld = false;
   }
+
+  // We can keep mouse and touch events enabled at the same time,
+  // because Google Chrome will apparently never fire both of them.
+
   on(gl.canvas, 'mousedown', mousedown);
   on(gl.canvas, 'mousemove', mousemove);
   on(gl.canvas, 'mouseup', mouseup);
@@ -321,6 +414,9 @@ function addEventListeners() {
   on(gl.canvas, 'DOMMouseScroll', mousewheel);
   on(gl.canvas, 'mouseover', reset);
   on(gl.canvas, 'mouseout', reset);
+  on(gl.canvas, 'touchstart', touchstart);
+  on(gl.canvas, 'touchmove', touchmove);
+  on(gl.canvas, 'touchend', touchend);
   on(document, 'contextmenu', resetAll);
 }
 
