@@ -57,7 +57,7 @@ Vector.prototype = {
   },
   toAngles: function() {
     return {
-      theta: Math.atan2(this.z, this.x),
+      theta: Math.atan2(this.y, this.x),
       phi: Math.asin(this.y / this.length())
     };
   },
