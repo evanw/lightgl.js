@@ -296,6 +296,12 @@ function addEventListeners() {
     if (gl.onmouseup) gl.onmouseup(e);
     e.preventDefault();
   }
+  function mousewheel(e) {
+    gl = context;
+    e = augment(e);
+    if(gl.onmousewheel) gl.onmousewheel(e);
+    e.preventDefault();
+  }
   function reset() {
     hasOld = false;
   }
@@ -306,6 +312,7 @@ function addEventListeners() {
   on(gl.canvas, 'mousedown', mousedown);
   on(gl.canvas, 'mousemove', mousemove);
   on(gl.canvas, 'mouseup', mouseup);
+  on(gl.canvas, 'mousewheel', mousewheel);
   on(gl.canvas, 'mouseover', reset);
   on(gl.canvas, 'mouseout', reset);
   on(document, 'contextmenu', resetAll);
