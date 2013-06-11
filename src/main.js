@@ -21,6 +21,7 @@ var GL = {
     try { gl = canvas.getContext('webgl', options); } catch (e) {}
     try { gl = gl || canvas.getContext('experimental-webgl', options); } catch (e) {}
     if (!gl) throw 'WebGL not supported';
+    gl.viewport(0, 0, canvas.width, canvas.height);
     addMatrixStack();
     addImmediateMode();
     addEventListeners();
@@ -225,12 +226,13 @@ function addEventListeners() {
     return false;
   }
 
-  function augment(original) {
-    // Make a copy of original, a native `MouseEvent`, so we can overwrite
-    // WebKit's non-standard read-only `x` and `y` properties (which are just
-    // duplicates of `pageX` and `pageY`). We can't just use
-    // `Object.create(original)` because some `MouseEvent` functions must be
-    // called in the context of the original event object.
+  // Make a copy of original, a native `MouseEvent`, so we can overwrite
+  // WebKit's non-standard read-only `x` and `y` properties (which are just
+  // duplicates of `pageX` and `pageY`). We can't just use
+  // `Object.create(original)` because some `MouseEvent` functions must be
+  // called in the context of the original event object.
+  //
+  function duplicateEvent(original) {
     var e = {};
     for (var name in original) {
       if (typeof original[name] == 'function') {
@@ -244,12 +246,22 @@ function addEventListeners() {
       }
     }
     e.original = original;
-    e.x = e.pageX;
-    e.y = e.pageY;
+    e.preventDefault = function() {
+      e.original.preventDefault();
+    };
+    e.stopPropagation = function() {
+      e.original.stopPropagation();
+    };
+    return e;
+  }
+
+  function addRelativeCoords(e) {
     for (var obj = gl.canvas; obj; obj = obj.offsetParent) {
       e.x -= obj.offsetLeft;
       e.y -= obj.offsetTop;
     }
+    e.x = Math.round(e.x * gl.canvas.width / gl.canvas.offsetWidth);
+    e.y = Math.round(e.y * gl.canvas.height / gl.canvas.offsetHeight);
     if (hasOld) {
       e.deltaX = e.x - oldX;
       e.deltaY = e.y - oldY;
@@ -260,59 +272,26 @@ function addEventListeners() {
     }
     oldX = e.x;
     oldY = e.y;
+  }
+
+  function augmentMouseEvent(original) {
+    var e = duplicateEvent(original);
+    e.x = e.pageX;
+    e.y = e.pageY;
+    addRelativeCoords(e);
     e.dragging = isDragging();
-    e.preventDefault = function() {
-      e.original.preventDefault();
-    };
-    e.stopPropagation = function() {
-      e.original.stopPropagation();
-    };
     return e;
   }
 
   function augmentTouchEvent(original) {
-    var e = {};
-    for (var name in original) {
-      if (typeof original[name] == 'function') {
-        e[name] = (function(callback) {
-          return function() {
-            callback.apply(original, arguments);
-          };
-        })(original[name]);
-      } else {
-        e[name] = original[name];
-      }
-    }
-    e.original = original;
-
+    var e = duplicateEvent(original);
     if (e.targetTouches.length > 0) {
       var touch = e.targetTouches[0];
       e.x = touch.pageX;
       e.y = touch.pageY;
-
-      for (var obj = gl.canvas; obj; obj = obj.offsetParent) {
-        e.x -= obj.offsetLeft;
-        e.y -= obj.offsetTop;
-      }
-      if (hasOld) {
-        e.deltaX = e.x - oldX;
-        e.deltaY = e.y - oldY;
-      } else {
-        e.deltaX = 0;
-        e.deltaY = 0;
-        hasOld = true;
-      }
-      oldX = e.x;
-      oldY = e.y;
+      addRelativeCoords(e);
       e.dragging = true;
     }
-
-    e.preventDefault = function() {
-      e.original.preventDefault();
-    };
-    e.stopPropagation = function() {
-      e.original.stopPropagation();
-    };
     return e;
   }
 
@@ -326,14 +305,14 @@ function addEventListeners() {
       off(gl.canvas, 'mouseup', mouseup);
     }
     buttons[e.which] = true;
-    e = augment(e);
+    e = augmentMouseEvent(e);
     if (gl.onmousedown) gl.onmousedown(e);
     e.preventDefault();
   }
 
   function mousemove(e) {
     gl = context;
-    e = augment(e);
+    e = augmentMouseEvent(e);
     if (gl.onmousemove) gl.onmousemove(e);
     e.preventDefault();
   }
@@ -348,14 +327,14 @@ function addEventListeners() {
       on(gl.canvas, 'mousemove', mousemove);
       on(gl.canvas, 'mouseup', mouseup);
     }
-    e = augment(e);
+    e = augmentMouseEvent(e);
     if (gl.onmouseup) gl.onmouseup(e);
     e.preventDefault();
   }
 
   function mousewheel(e) {
     gl = context;
-    e = augment(e);
+    e = augmentMouseEvent(e);
     if (gl.onmousewheel) gl.onmousewheel(e);
     e.preventDefault();
   }
