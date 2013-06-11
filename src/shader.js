@@ -273,7 +273,7 @@ Shader.fromURL = function(vsURL, fsURL) {
 
   var XMLHttpRequestGet = function (uri) {
     var mHttpReq = new XMLHttpRequest();
-    mHttpReq.open("GET", uri, false);
+    mHttpReq.open("GET", uri + "?" + Math.random(), false);
     mHttpReq.send(null);
     if (mHttpReq.status !== 200) {
       throw 'could not load ' + uri;
