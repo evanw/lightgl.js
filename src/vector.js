@@ -61,6 +61,9 @@ Vector.prototype = {
       phi: Math.asin(this.y / this.length())
     };
   },
+  angleTo: function(a) {
+    return Math.acos( this.dot(a) / ( this.length() * a.length() ) );
+  },
   toArray: function(n) {
     return [this.x, this.y, this.z].slice(0, n || 3);
   },
@@ -131,4 +134,7 @@ Vector.lerp = function(a, b, fraction) {
 };
 Vector.fromArray = function(a) {
   return new Vector(a[0], a[1], a[2]);
+};
+Vector.angleBetween = function(a, b) {
+  return a.angleTo(b);
 };
