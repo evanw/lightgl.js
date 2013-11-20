@@ -15,6 +15,7 @@ computed using rasterization. That is what this example does.
 -->
 <!DOCTYPE html>
 <html><body>
+  <script src="OES_texture_float_linear-polyfill.js"></script>
   <script src="../lightgl.js"></script>
   <script>
 
@@ -27,8 +28,8 @@ var gl = GL.create({
   // avoided by using centroid sampling except it isn't supported by WebGL.
   antialias: false
 });
-if (!gl.getExtension('OES_texture_float')) {
-  document.write('This demo requires the OES_texture_float extension to run');
+if (!gl.getExtension('OES_texture_float') || !gl.getExtension('OES_texture_float_linear')) {
+  document.write('This demo requires the OES_texture_float and OES_texture_float_linear extensions to run');
   throw 'not supported';
 }
 
