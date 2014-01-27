@@ -123,6 +123,12 @@ function Shader(vertexSource, fragmentSource) {
   regexMap(/uniform\s+sampler(1D|2D|3D|Cube)\s+(\w+)\s*;/g, vertexSource + fragmentSource, function(groups) {
     isSampler[groups[2]] = 1;
   });
+
+  // also do this for items that are explicitly marked as `int` types
+  regexMap(/uniform\s+int\s+(\w+)\s*;/g, vertexSource + fragmentSource, function(groups) {
+    isSampler[groups[1]] = 1;
+  });
+  
   this.isSampler = isSampler;
 }
 
