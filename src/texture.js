@@ -5,7 +5,7 @@
 // The arguments `width` and `height` give the size of the texture in texels.
 // WebGL texture dimensions must be powers of two unless `filter` is set to
 // either `gl.NEAREST` or `gl.LINEAR` and `wrap` is set to `gl.CLAMP_TO_EDGE`
-// (which they are by default).
+// (which they are by default). A stencil buffer will be attached if stencil set to true
 //
 // Texture parameters can be passed in via the `options` argument.
 // Example usage:
@@ -21,6 +21,7 @@
 // 
 //       format: gl.RGB, // Defaults to gl.RGBA
 //       type: gl.FLOAT // Defaults to gl.UNSIGNED_BYTE
+//       stencil: true // Defaults to false
 //     });
 function Texture(width, height, options) {
   options = options || {};
@@ -29,6 +30,8 @@ function Texture(width, height, options) {
   this.height = height;
   this.format = options.format || gl.RGBA;
   this.type = options.type || gl.UNSIGNED_BYTE;
+  this.internalFormat = options.stencil ? gl.DEPTH_STENCIL : gl.DEPTH_COMPONENT16;
+  this.attachment = options.stencil ? gl.DEPTH_STENCIL_ATTACHMENT : gl.DEPTH_ATTACHMENT;
   gl.bindTexture(gl.TEXTURE_2D, this.id);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, options.filter || options.magFilter || gl.LINEAR);
@@ -81,10 +84,10 @@ Texture.prototype = {
     if (this.width != renderbuffer.width || this.height != renderbuffer.height) {
       renderbuffer.width = this.width;
       renderbuffer.height = this.height;
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.width, this.height);
+      gl.renderbufferStorage(gl.RENDERBUFFER, this.internalFormat, this.width, this.height);
     }
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.id, 0);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, this.attachment, gl.RENDERBUFFER, renderbuffer);
     gl.viewport(0, 0, this.width, this.height);
 
     callback();
