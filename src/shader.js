@@ -263,3 +263,34 @@ Shader.prototype = {
     return this;
   }
 };
+
+// ### GL.Shader.fromURL(vsURL, fsURL)
+//
+// Compiles a shader program using the provided vertex and fragment
+// shaders. The shaders are loaded synchronously from the given URLs.
+// 
+Shader.fromURL = function(vsURL, fsURL) {
+
+  var XMLHttpRequestGet = function (uri) {
+    var mHttpReq = new XMLHttpRequest();
+    mHttpReq.open("GET", uri + "?" + Math.random(), false);
+    mHttpReq.send(null);
+    if (mHttpReq.status !== 200) {
+      throw 'could not load ' + uri;
+    }
+    return mHttpReq.responseText;
+  };
+
+  var vsSource = XMLHttpRequestGet(vsURL);
+  var fsSource = XMLHttpRequestGet(fsURL);
+
+  return new Shader(vsSource, fsSource);
+};
+
+Shader.from = function(vsURLorID, fsURLorID) {
+  try {
+    return new Shader(vsURLorID, fsURLorID);
+  } catch (e) {
+    return Shader.fromURL(vsURLorID, fsURLorID);
+  }
+};

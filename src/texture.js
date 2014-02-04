@@ -30,7 +30,7 @@ function Texture(width, height, options) {
   this.format = options.format || gl.RGBA;
   this.type = options.type || gl.UNSIGNED_BYTE;
   gl.bindTexture(gl.TEXTURE_2D, this.id);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, options.filter || options.magFilter || gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, options.filter || options.minFilter || gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, options.wrap || options.wrapS || gl.CLAMP_TO_EDGE);
@@ -59,33 +59,40 @@ Texture.prototype = {
     gl.bindTexture(gl.TEXTURE_2D, null);
   },
 
-  // ### .drawTo(callback)
+  // ### .drawTo(callback[, options])
   // 
-  // Render all draw calls in `callback` to this texture. This method sets up
-  // a framebuffer with this texture as the color attachment and a renderbuffer
-  // as the depth attachment. It also temporarily changes the viewport to the
-  // size of the texture.
-  // 
-  // Example usage:
+  // Render all draw calls in `callback` to this texture. This method
+  // sets up a framebuffer with this texture as the color attachment
+  // and a renderbuffer as the depth attachment.  The viewport is
+  // temporarily changed to the size of the texture.
+  //
+  // The depth buffer can be omitted via `options` as shown in the
+  // example below:
   // 
   //     texture.drawTo(function() {
   //       gl.clearColor(1, 0, 0, 1);
   //       gl.clear(gl.COLOR_BUFFER_BIT);
-  //     });
-  drawTo: function(callback) {
+  //     }, { depth: false });
+  drawTo: function(callback, options) {
+
+    options = options || {};
     var v = gl.getParameter(gl.VIEWPORT);
-    framebuffer = framebuffer || gl.createFramebuffer();
-    renderbuffer = renderbuffer || gl.createRenderbuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
-    if (this.width != renderbuffer.width || this.height != renderbuffer.height) {
-      renderbuffer.width = this.width;
-      renderbuffer.height = this.height;
-      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.width, this.height);
-    }
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.id, 0);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
     gl.viewport(0, 0, this.width, this.height);
+
+    framebuffer = framebuffer || gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.id, 0);
+
+    if (!(options.depth === false)) {
+      renderbuffer = renderbuffer || gl.createRenderbuffer();
+      gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+      if (this.width != renderbuffer.width || this.height != renderbuffer.height) {
+        renderbuffer.width = this.width;
+        renderbuffer.height = this.height;
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.width, this.height);
+      }
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+    }
 
     callback();
 
