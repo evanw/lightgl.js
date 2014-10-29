@@ -58,6 +58,9 @@ take either a vector or a number as an argument.</p>             </td>          
       <span class="nx">phi</span><span class="o">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">asin</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">y</span> <span class="o">/</span> <span class="k">this</span><span class="p">.</span><span class="nx">length</span><span class="p">())</span>
     <span class="p">};</span>
   <span class="p">},</span>
+  <span class="nx">angleTo</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">acos</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">dot</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">length</span><span class="p">()</span> <span class="o">*</span> <span class="nx">a</span><span class="p">.</span><span class="nx">length</span><span class="p">()));</span>
+  <span class="p">},</span>
   <span class="nx">toArray</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="p">[</span><span class="k">this</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">z</span><span class="p">].</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">n</span> <span class="o">||</span> <span class="mi">3</span><span class="p">);</span>
   <span class="p">},</span>
@@ -126,6 +129,9 @@ interpolation between two vectors.</p>             </td>             <td class="
 <span class="p">};</span>
 <span class="nx">Vector</span><span class="p">.</span><span class="nx">fromArray</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">return</span> <span class="k">new</span> <span class="nx">Vector</span><span class="p">(</span><span class="nx">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+<span class="p">};</span>
+<span class="nx">Vector</span><span class="p">.</span><span class="nx">angleBetween</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">a</span><span class="p">.</span><span class="nx">angleTo</span><span class="p">(</span><span class="nx">b</span><span class="p">);</span>
 <span class="p">};</span>
 
 </pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
