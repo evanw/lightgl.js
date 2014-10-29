@@ -1,6 +1,6 @@
 // Represents indexed triangle geometry with arbitrary additional attributes.
 // You need a shader to draw a mesh; meshes can't draw themselves.
-// 
+//
 // A mesh is a collection of `GL.Buffer` objects which are either vertex buffers
 // (holding per-vertex attributes) or index buffers (holding the order in which
 // vertices are rendered). By default, a mesh has a position vertex buffer called
@@ -8,35 +8,35 @@
 // added using `addVertexBuffer()` and `addIndexBuffer()`. Two strings are
 // required when adding a new vertex buffer, the name of the data array on the
 // mesh instance and the name of the GLSL attribute in the vertex shader.
-// 
+//
 // Example usage:
-// 
+//
 //     var mesh = new GL.Mesh({ coords: true, lines: true });
-// 
+//
 //     // Default attribute "vertices", available as "gl_Vertex" in
 //     // the vertex shader
 //     mesh.vertices = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]];
-// 
+//
 //     // Optional attribute "coords" enabled in constructor,
 //     // available as "gl_TexCoord" in the vertex shader
 //     mesh.coords = [[0, 0], [1, 0], [0, 1], [1, 1]];
-// 
+//
 //     // Custom attribute "weights", available as "weight" in the
 //     // vertex shader
 //     mesh.addVertexBuffer('weights', 'weight');
 //     mesh.weights = [1, 0, 0, 1];
-// 
+//
 //     // Default index buffer "triangles"
 //     mesh.triangles = [[0, 1, 2], [2, 1, 3]];
-// 
+//
 //     // Optional index buffer "lines" enabled in constructor
 //     mesh.lines = [[0, 1], [0, 2], [1, 3], [2, 3]];
-// 
+//
 //     // Upload provided data to GPU memory
 //     mesh.compile();
 
 // ### new GL.Indexer()
-// 
+//
 // Generates indices into a list of unique objects from a stream of objects
 // that may contain duplicates. This is useful for generating compact indexed
 // meshes from unindexed data.
@@ -48,7 +48,7 @@ function Indexer() {
 
 Indexer.prototype = {
   // ### .add(v)
-  // 
+  //
   // Adds the object `obj` to `unique` if it hasn't already been added. Returns
   // the index of `obj` in `unique`.
   add: function(obj) {
@@ -62,16 +62,16 @@ Indexer.prototype = {
 };
 
 // ### new GL.Buffer(target, type)
-// 
+//
 // Provides a simple method of uploading data to a GPU buffer. Example usage:
-// 
+//
 //     var vertices = new GL.Buffer(gl.ARRAY_BUFFER, Float32Array);
 //     var indices = new GL.Buffer(gl.ELEMENT_ARRAY_BUFFER, Uint16Array);
 //     vertices.data = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]];
 //     indices.data = [[0, 1, 2], [2, 1, 3]];
 //     vertices.compile();
 //     indices.compile();
-// 
+//
 function Buffer(target, type) {
   this.buffer = null;
   this.target = target;
@@ -81,14 +81,14 @@ function Buffer(target, type) {
 
 Buffer.prototype = {
   // ### .compile(type)
-  // 
+  //
   // Upload the contents of `data` to the GPU in preparation for rendering. The
   // data must be a list of lists where each inner list has the same length. For
   // example, each element of data for vertex normals would be a list of length three.
   // This will remember the data length and element length for later use by shaders.
   // The type can be either `gl.STATIC_DRAW` or `gl.DYNAMIC_DRAW`, and defaults to
   // `gl.STATIC_DRAW`.
-  // 
+  //
   // This could have used `[].concat.apply([], this.data)` to flatten
   // the array but Google Chrome has a maximum number of arguments so the
   // concatenations are chunked to avoid that limit.
@@ -98,7 +98,7 @@ Buffer.prototype = {
       data = Array.prototype.concat.apply(data, this.data.slice(i, i + chunk));
     }
     var spacing = this.data.length ? data.length / this.data.length : 0;
-    if (spacing != Math.round(spacing)) throw 'buffer elements not of consistent size, average size is ' + spacing;
+    if (spacing != Math.round(spacing)) throw new Error('buffer elements not of consistent size, average size is ' + spacing);
     this.buffer = this.buffer || gl.createBuffer();
     this.buffer.length = data.length;
     this.buffer.spacing = spacing;
@@ -108,7 +108,7 @@ Buffer.prototype = {
 };
 
 // ### new GL.Mesh([options])
-// 
+//
 // Represents a collection of vertex buffers and index buffers. Each vertex
 // buffer maps to one attribute in GLSL and has a corresponding property set
 // on the Mesh instance. There is one vertex buffer by default: `vertices`,
@@ -133,7 +133,7 @@ function Mesh(options) {
 
 Mesh.prototype = {
   // ### .addVertexBuffer(name, attribute)
-  // 
+  //
   // Add a new vertex buffer with a list as a property called `name` on this object
   // and map it to the attribute called `attribute` in all shaders that draw this mesh.
   addVertexBuffer: function(name, attribute) {
@@ -143,7 +143,7 @@ Mesh.prototype = {
   },
 
   // ### .addIndexBuffer(name)
-  // 
+  //
   // Add a new index buffer with a list as a property called `name` on this object.
   addIndexBuffer: function(name) {
     var buffer = this.indexBuffers[name] = new Buffer(gl.ELEMENT_ARRAY_BUFFER, Uint16Array);
@@ -151,7 +151,7 @@ Mesh.prototype = {
   },
 
   // ### .compile()
-  // 
+  //
   // Upload all attached buffers to the GPU in preparation for rendering. This
   // doesn't need to be called every frame, only needs to be done when the data
   // changes.
@@ -170,7 +170,7 @@ Mesh.prototype = {
   },
 
   // ### .transform(matrix)
-  // 
+  //
   // Transform all vertices by `matrix` and all normals by the inverse transpose
   // of `matrix`.
   transform: function(matrix) {
@@ -188,7 +188,7 @@ Mesh.prototype = {
   },
 
   // ### .computeNormals()
-  // 
+  //
   // Computes a new normal for each vertex from the average normal of the
   // neighboring triangles. This means adjacent triangles must share vertices
   // for the resulting normals to be smooth.
@@ -215,7 +215,7 @@ Mesh.prototype = {
   },
 
   // ### .computeWireframe()
-  // 
+  //
   // Populate the `lines` index buffer from the `triangles` index buffer.
   computeWireframe: function() {
     var indexer = new Indexer();
@@ -233,7 +233,7 @@ Mesh.prototype = {
   },
 
   // ### .getAABB()
-  // 
+  //
   // Computes the axis-aligned bounding box, which is an object whose `min` and
   // `max` properties contain the minimum and maximum coordinates of all vertices.
   getAABB: function() {
@@ -248,7 +248,7 @@ Mesh.prototype = {
   },
 
   // ### .getBoundingSphere()
-  // 
+  //
   // Computes a sphere that contains all vertices (not necessarily the smallest
   // sphere). The returned object has two properties, `center` and `radius`.
   getBoundingSphere: function() {
@@ -263,18 +263,18 @@ Mesh.prototype = {
 };
 
 // ### GL.Mesh.plane([options])
-// 
+//
 // Generates a square 2x2 mesh the xy plane centered at the origin. The
 // `options` argument specifies options to pass to the mesh constructor.
 // Additional options include `detailX` and `detailY`, which set the tesselation
 // in x and y, and `detail`, which sets both `detailX` and `detailY` at once.
 // Two triangles are generated by default.
 // Example usage:
-// 
+//
 //     var mesh1 = GL.Mesh.plane();
 //     var mesh2 = GL.Mesh.plane({ detail: 5 });
 //     var mesh3 = GL.Mesh.plane({ detailX: 20, detailY: 40 });
-// 
+//
 Mesh.plane = function(options) {
   options = options || {};
   var mesh = new Mesh(options);
@@ -314,7 +314,7 @@ function pickOctant(i) {
 }
 
 // ### GL.Mesh.cube([options])
-// 
+//
 // Generates a 2x2x2 box centered at the origin. The `options` argument
 // specifies options to pass to the mesh constructor.
 Mesh.cube = function(options) {
@@ -337,15 +337,15 @@ Mesh.cube = function(options) {
 };
 
 // ### GL.Mesh.sphere([options])
-// 
+//
 // Generates a geodesic sphere of radius 1. The `options` argument specifies
 // options to pass to the mesh constructor in addition to the `detail` option,
 // which controls the tesselation level. The detail is `6` by default.
 // Example usage:
-// 
+//
 //     var mesh1 = GL.Mesh.sphere();
 //     var mesh2 = GL.Mesh.sphere({ detail: 2 });
-// 
+//
 Mesh.sphere = function(options) {
   function tri(a, b, c) { return flip ? [a, c, b] : [a, b, c]; }
   function fix(x) { return x + (x - x * x) / 2; }
@@ -393,16 +393,16 @@ Mesh.sphere = function(options) {
 };
 
 // ### GL.Mesh.load(json[, options])
-// 
+//
 // Creates a mesh from the JSON generated by the `convert/convert.py` script.
 // Example usage:
-// 
+//
 //     var data = {
 //       vertices: [[0, 0, 0], [1, 0, 0], [0, 1, 0]],
 //       triangles: [[0, 1, 2]]
 //     };
 //     var mesh = GL.Mesh.load(data);
-// 
+//
 Mesh.load = function(json, options) {
   options = options || {};
   if (!('coords' in options)) options.coords = !!json.coords;

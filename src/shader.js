@@ -1,9 +1,9 @@
 // Provides a convenient wrapper for WebGL shaders. A few uniforms and attributes,
 // prefixed with `gl_`, are automatically added to all shader sources to make
 // simple shaders easier to write.
-// 
+//
 // Example usage:
-// 
+//
 //     var shader = new GL.Shader('\
 //       void main() {\
 //         gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\
@@ -14,7 +14,7 @@
 //         gl_FragColor = color;\
 //       }\
 //     ');
-// 
+//
 //     shader.uniforms({
 //       color: [1, 0, 0, 1]
 //     }).draw(mesh);
@@ -30,7 +30,7 @@ function regexMap(regex, text, callback) {
 var LIGHTGL_PREFIX = 'LIGHTGL';
 
 // ### new GL.Shader(vertexSource, fragmentSource)
-// 
+//
 // Compiles a shader program using the provided vertex and fragment shaders.
 function Shader(vertexSource, fragmentSource) {
   // Allow passing in the id of an HTML script tag with the source
@@ -103,7 +103,7 @@ function Shader(vertexSource, fragmentSource) {
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      throw 'compile error: ' + gl.getShaderInfoLog(shader);
+      throw new Error('compile error: ' + gl.getShaderInfoLog(shader));
     }
     return shader;
   }
@@ -112,7 +112,7 @@ function Shader(vertexSource, fragmentSource) {
   gl.attachShader(this.program, compileSource(gl.FRAGMENT_SHADER, fragmentSource));
   gl.linkProgram(this.program);
   if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
-    throw 'link error: ' + gl.getProgramInfoLog(this.program);
+    throw new Error('link error: ' + gl.getProgramInfoLog(this.program));
   }
   this.attributes = {};
   this.uniformLocations = {};
@@ -141,7 +141,7 @@ var resultMatrix = new Matrix();
 
 Shader.prototype = {
   // ### .uniforms(uniforms)
-  // 
+  //
   // Set a uniform for each property of `uniforms`. The correct `gl.uniform*()` method is
   // inferred from the value types and from the stored uniform sampler flags.
   uniforms: function(uniforms) {
@@ -176,12 +176,12 @@ Shader.prototype = {
             value[2], value[6], value[10], value[14],
             value[3], value[7], value[11], value[15]
           ])); break;
-          default: throw 'don\'t know how to load uniform "' + name + '" of length ' + value.length;
+          default: throw new Error('don\'t know how to load uniform "' + name + '" of length ' + value.length);
         }
       } else if (isNumber(value)) {
         (this.isSampler[name] ? gl.uniform1i : gl.uniform1f).call(gl, location, value);
       } else {
-        throw 'attempted to set uniform "' + name + '" to invalid value ' + value;
+        throw new Error('attempted to set uniform "' + name + '" to invalid value ' + value);
       }
     }
 
@@ -189,7 +189,7 @@ Shader.prototype = {
   },
 
   // ### .draw(mesh[, mode])
-  // 
+  //
   // Sets all uniform matrix attributes, binds all relevant buffers, and draws the
   // mesh geometry as indexed triangles or indexed lines. Set `mode` to `gl.LINES`
   // (and either add indices to `lines` or call `computeWireframe()`) to draw the
@@ -201,7 +201,7 @@ Shader.prototype = {
   },
 
   // ### .drawBuffers(vertexBuffers, indexBuffer, mode)
-  // 
+  //
   // Sets all uniform matrix attributes, binds all relevant buffers, and draws the
   // indexed mesh geometry. The `vertexBuffers` argument is a map from attribute
   // names to `Buffer` objects of type `gl.ARRAY_BUFFER`, `indexBuffer` is a `Buffer`

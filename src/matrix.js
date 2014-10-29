@@ -6,7 +6,7 @@
 var hasFloat32Array = (typeof Float32Array != 'undefined');
 
 // ### new GL.Matrix([elements])
-// 
+//
 // This constructor takes 16 arguments in row-major order, which can be passed
 // individually, as a list, or even as four lists, one for each row. If the
 // arguments are omitted then the identity matrix is constructed instead.
@@ -25,7 +25,7 @@ function Matrix() {
 
 Matrix.prototype = {
   // ### .inverse()
-  // 
+  //
   // Returns the matrix that when multiplied with this matrix results in the
   // identity matrix.
   inverse: function() {
@@ -33,14 +33,14 @@ Matrix.prototype = {
   },
 
   // ### .transpose()
-  // 
+  //
   // Returns this matrix, exchanging columns for rows.
   transpose: function() {
     return Matrix.transpose(this, new Matrix());
   },
 
   // ### .multiply(matrix)
-  // 
+  //
   // Returns the concatenation of the transforms for this matrix and `matrix`.
   // This emulates the OpenGL function `glMultMatrix()`.
   multiply: function(matrix) {
@@ -48,7 +48,7 @@ Matrix.prototype = {
   },
 
   // ### .transformPoint(point)
-  // 
+  //
   // Transforms the vector as a point with a w coordinate of 1. This
   // means translations will have an effect, for example.
   transformPoint: function(v) {
@@ -61,7 +61,7 @@ Matrix.prototype = {
   },
 
   // ### .transformPoint(vector)
-  // 
+  //
   // Transforms the vector as a vector with a w coordinate of 0. This
   // means translations will have no effect, for example.
   transformVector: function(v) {
@@ -75,7 +75,7 @@ Matrix.prototype = {
 };
 
 // ### GL.Matrix.inverse(matrix[, result])
-// 
+//
 // Returns the matrix that when multiplied with `matrix` results in the
 // identity matrix. You can optionally pass an existing matrix in `result`
 // to avoid allocating a new matrix. This implementation is from the Mesa
@@ -110,7 +110,7 @@ Matrix.inverse = function(matrix, result) {
 };
 
 // ### GL.Matrix.transpose(matrix[, result])
-// 
+//
 // Returns `matrix`, exchanging columns for rows. You can optionally pass an
 // existing matrix in `result` to avoid allocating a new matrix.
 Matrix.transpose = function(matrix, result) {
@@ -124,7 +124,7 @@ Matrix.transpose = function(matrix, result) {
 };
 
 // ### GL.Matrix.multiply(left, right[, result])
-// 
+//
 // Returns the concatenation of the transforms for `left` and `right`. You can
 // optionally pass an existing matrix in `result` to avoid allocating a new
 // matrix. This emulates the OpenGL function `glMultMatrix()`.
@@ -156,7 +156,7 @@ Matrix.multiply = function(left, right, result) {
 };
 
 // ### GL.Matrix.identity([result])
-// 
+//
 // Returns an identity matrix. You can optionally pass an existing matrix in
 // `result` to avoid allocating a new matrix. This emulates the OpenGL function
 // `glLoadIdentity()`.
@@ -169,7 +169,7 @@ Matrix.identity = function(result) {
 };
 
 // ### GL.Matrix.perspective(fov, aspect, near, far[, result])
-// 
+//
 // Returns a perspective transform matrix, which makes far away objects appear
 // smaller than nearby objects. The `aspect` argument should be the width
 // divided by the height of your viewport and `fov` is the top-to-bottom angle
@@ -183,7 +183,7 @@ Matrix.perspective = function(fov, aspect, near, far, result) {
 };
 
 // ### GL.Matrix.frustum(left, right, bottom, top, near, far[, result])
-// 
+//
 // Sets up a viewing frustum, which is shaped like a truncated pyramid with the
 // camera where the point of the pyramid would be. You can optionally pass an
 // existing matrix in `result` to avoid allocating a new matrix. This emulates
@@ -216,7 +216,7 @@ Matrix.frustum = function(l, r, b, t, n, f, result) {
 };
 
 // ### GL.Matrix.ortho(left, right, bottom, top, near, far[, result])
-// 
+//
 // Returns an orthographic projection, in which objects are the same size no
 // matter how far away or nearby they are. You can optionally pass an existing
 // matrix in `result` to avoid allocating a new matrix. This emulates the OpenGL
@@ -249,9 +249,9 @@ Matrix.ortho = function(l, r, b, t, n, f, result) {
 };
 
 // ### GL.Matrix.scale(x, y, z[, result])
-// 
+//
 // This emulates the OpenGL function `glScale()`. You can optionally pass an
-// existing matrix in `result` to avoid allocating a new matrix. 
+// existing matrix in `result` to avoid allocating a new matrix.
 Matrix.scale = function(x, y, z, result) {
   result = result || new Matrix();
   var m = result.m;
@@ -280,9 +280,9 @@ Matrix.scale = function(x, y, z, result) {
 };
 
 // ### GL.Matrix.translate(x, y, z[, result])
-// 
+//
 // This emulates the OpenGL function `glTranslate()`. You can optionally pass
-// an existing matrix in `result` to avoid allocating a new matrix. 
+// an existing matrix in `result` to avoid allocating a new matrix.
 Matrix.translate = function(x, y, z, result) {
   result = result || new Matrix();
   var m = result.m;
@@ -311,10 +311,10 @@ Matrix.translate = function(x, y, z, result) {
 };
 
 // ### GL.Matrix.rotate(a, x, y, z[, result])
-// 
+//
 // Returns a matrix that rotates by `a` degrees around the vector `x, y, z`.
 // You can optionally pass an existing matrix in `result` to avoid allocating
-// a new matrix. This emulates the OpenGL function `glRotate()`. 
+// a new matrix. This emulates the OpenGL function `glRotate()`.
 Matrix.rotate = function(a, x, y, z, result) {
   if (!a || (!x && !y && !z)) {
     return Matrix.identity(result);
@@ -351,7 +351,7 @@ Matrix.rotate = function(a, x, y, z, result) {
 };
 
 // ### GL.Matrix.lookAt(ex, ey, ez, cx, cy, cz, ux, uy, uz[, result])
-// 
+//
 // Returns a matrix that puts the camera at the eye point `ex, ey, ez` looking
 // toward the center point `cx, cy, cz` with an up direction of `ux, uy, uz`.
 // You can optionally pass an existing matrix in `result` to avoid allocating

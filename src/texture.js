@@ -9,16 +9,16 @@
 //
 // Texture parameters can be passed in via the `options` argument.
 // Example usage:
-// 
+//
 //     var t = new GL.Texture(256, 256, {
 //       // Defaults to gl.LINEAR, set both at once with "filter"
 //       magFilter: gl.NEAREST,
 //       minFilter: gl.LINEAR,
-// 
+//
 //       // Defaults to gl.CLAMP_TO_EDGE, set both at once with "wrap"
 //       wrapS: gl.REPEAT,
 //       wrapT: gl.REPEAT,
-// 
+//
 //       format: gl.RGB, // Defaults to gl.RGBA
 //       type: gl.FLOAT // Defaults to gl.UNSIGNED_BYTE
 //     });
@@ -44,7 +44,7 @@ var checkerboardCanvas;
 
 Texture.prototype = {
   // ### .bind([unit])
-  // 
+  //
   // Bind this texture to the given texture unit (0-7, defaults to 0).
   bind: function(unit) {
     gl.activeTexture(gl.TEXTURE0 + (unit || 0));
@@ -52,7 +52,7 @@ Texture.prototype = {
   },
 
   // ### .unbind([unit])
-  // 
+  //
   // Clear the given texture unit (0-7, defaults to 0).
   unbind: function(unit) {
     gl.activeTexture(gl.TEXTURE0 + (unit || 0));
@@ -60,14 +60,14 @@ Texture.prototype = {
   },
 
   // ### .drawTo(callback)
-  // 
+  //
   // Render all draw calls in `callback` to this texture. This method sets up
   // a framebuffer with this texture as the color attachment and a renderbuffer
   // as the depth attachment. It also temporarily changes the viewport to the
   // size of the texture.
-  // 
+  //
   // Example usage:
-  // 
+  //
   //     texture.drawTo(function() {
   //       gl.clearColor(1, 0, 0, 1);
   //       gl.clear(gl.COLOR_BUFFER_BIT);
@@ -95,7 +95,7 @@ Texture.prototype = {
   },
 
   // ### .swapWith(other)
-  // 
+  //
   // Switch this texture with `other`, useful for the ping-pong rendering
   // technique used in multi-stage rendering.
   swapWith: function(other) {
@@ -107,7 +107,7 @@ Texture.prototype = {
 };
 
 // ### GL.Texture.fromImage(image[, options])
-// 
+//
 // Return a new image created from `image`, an `<img>` tag.
 Texture.fromImage = function(image, options) {
   options = options || {};
@@ -116,10 +116,10 @@ Texture.fromImage = function(image, options) {
     gl.texImage2D(gl.TEXTURE_2D, 0, texture.format, texture.format, texture.type, image);
   } catch (e) {
     if (location.protocol == 'file:') {
-      throw 'image not loaded for security reasons (serve this page over "http://" instead)';
+      throw new Error('image not loaded for security reasons (serve this page over "http://" instead)');
     } else {
-      throw 'image not loaded for security reasons (image must originate from the same ' +
-        'domain as this page or use Cross-Origin Resource Sharing)';
+      throw new Error('image not loaded for security reasons (image must originate from the same ' +
+        'domain as this page or use Cross-Origin Resource Sharing)');
     }
   }
   if (options.minFilter && options.minFilter != gl.NEAREST && options.minFilter != gl.LINEAR) {
@@ -129,7 +129,7 @@ Texture.fromImage = function(image, options) {
 };
 
 // ### GL.Texture.fromURL(url[, options])
-// 
+//
 // Returns a checkerboard texture that will switch to the correct texture when
 // it loads.
 Texture.fromURL = function(url, options) {

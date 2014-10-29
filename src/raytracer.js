@@ -1,7 +1,7 @@
 // Provides a convenient raytracing interface.
 
 // ### new GL.HitTest([t, hit, normal])
-// 
+//
 // This is the object used to return hit test results. If there are no
 // arguments, the constructed argument represents a hit infinitely far
 // away.
@@ -12,7 +12,7 @@ function HitTest(t, hit, normal) {
 }
 
 // ### .mergeWith(other)
-// 
+//
 // Changes this object to be the closer of the two hit test results.
 HitTest.prototype = {
   mergeWith: function(other) {
@@ -25,13 +25,13 @@ HitTest.prototype = {
 };
 
 // ### new GL.Raytracer()
-// 
+//
 // This will read the current modelview matrix, projection matrix, and viewport,
 // reconstruct the eye position, and store enough information to later generate
 // per-pixel rays using `getRayForPixel()`.
-// 
+//
 // Example usage:
-// 
+//
 //     var tracer = new GL.Raytracer();
 //     var ray = tracer.getRayForPixel(
 //       gl.canvas.width / 2,
@@ -59,7 +59,7 @@ function Raytracer() {
 
 Raytracer.prototype = {
   // ### .getRayForPixel(x, y)
-  // 
+  //
   // Returns the ray originating from the camera and traveling through the pixel `x, y`.
   getRayForPixel: function(x, y) {
     x = (x - this.viewport[0]) / this.viewport[2];
@@ -71,11 +71,11 @@ Raytracer.prototype = {
 };
 
 // ### GL.Raytracer.hitTestBox(origin, ray, min, max)
-// 
+//
 // Traces the ray starting from `origin` along `ray` against the axis-aligned box
 // whose coordinates extend from `min` to `max`. Returns a `HitTest` with the
 // information or `null` for no intersection.
-// 
+//
 // This implementation uses the [slab intersection method](http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm).
 Raytracer.hitTestBox = function(origin, ray, min, max) {
   var tMin = min.subtract(origin).divide(ray);
@@ -100,7 +100,7 @@ Raytracer.hitTestBox = function(origin, ray, min, max) {
 };
 
 // ### GL.Raytracer.hitTestSphere(origin, ray, center, radius)
-// 
+//
 // Traces the ray starting from `origin` along `ray` against the sphere defined
 // by `center` and `radius`. Returns a `HitTest` with the information or `null`
 // for no intersection.
@@ -120,7 +120,7 @@ Raytracer.hitTestSphere = function(origin, ray, center, radius) {
 };
 
 // ### GL.Raytracer.hitTestTriangle(origin, ray, a, b, c)
-// 
+//
 // Traces the ray starting from `origin` along `ray` against the triangle defined
 // by the points `a`, `b`, and `c`. Returns a `HitTest` with the information or
 // `null` for no intersection.

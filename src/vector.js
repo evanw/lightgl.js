@@ -62,7 +62,7 @@ Vector.prototype = {
     };
   },
   angleTo: function(a) {
-    return Math.acos( this.dot(a) / ( this.length() * a.length() ) );
+    return Math.acos(this.dot(a) / (this.length() * a.length()));
   },
   toArray: function(n) {
     return [this.x, this.y, this.z].slice(0, n || 3);

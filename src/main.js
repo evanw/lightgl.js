@@ -3,7 +3,7 @@ var gl;
 
 var GL = {
   // ### Initialization
-  // 
+  //
   // `GL.create()` creates a new WebGL context and augments it with more
   // methods. The alpha channel is disabled by default because it usually causes
   // unintended transparencies in the canvas.
@@ -15,7 +15,7 @@ var GL = {
     if (!('alpha' in options)) options.alpha = false;
     try { gl = canvas.getContext('webgl', options); } catch (e) {}
     try { gl = gl || canvas.getContext('experimental-webgl', options); } catch (e) {}
-    if (!gl) throw 'WebGL not supported';
+    if (!gl) throw new Error('WebGL not supported');
     addMatrixStack();
     addImmediateMode();
     addEventListeners();
@@ -40,7 +40,7 @@ var GL = {
 };
 
 // ### Matrix stack
-// 
+//
 // Implement the OpenGL modelview and projection matrix stacks, along with some
 // other useful GLU matrix functions.
 
@@ -65,7 +65,7 @@ function addMatrixStack() {
         stack = projectionStack;
         break;
       default:
-        throw 'invalid matrix mode ' + mode;
+        throw new Error('invalid matrix mode ' + mode);
     }
   };
   gl.loadIdentity = function() {
@@ -134,7 +134,7 @@ function addMatrixStack() {
 }
 
 // ### Immediate mode
-// 
+//
 // Provide an implementation of OpenGL's deprecated immediate mode. This is
 // depricated for a reason: constantly re-specifying the geometry is a bad
 // idea for performance. You should use a `GL.Mesh` instead, which specifies
@@ -176,7 +176,7 @@ function addImmediateMode() {
     immediateMode.shader.uniforms({ pointSize: pointSize });
   };
   gl.begin = function(mode) {
-    if (immediateMode.mode != -1) throw 'mismatched gl.begin() and gl.end() calls';
+    if (immediateMode.mode != -1) throw new Error('mismatched gl.begin() and gl.end() calls');
     immediateMode.mode = mode;
     immediateMode.mesh.colors = [];
     immediateMode.mesh.coords = [];
@@ -194,7 +194,7 @@ function addImmediateMode() {
     immediateMode.mesh.vertices.push(arguments.length == 1 ? x.toArray() : [x, y, z]);
   };
   gl.end = function() {
-    if (immediateMode.mode == -1) throw 'mismatched gl.begin() and gl.end() calls';
+    if (immediateMode.mode == -1) throw new Error('mismatched gl.begin() and gl.end() calls');
     immediateMode.mesh.compile();
     immediateMode.shader.uniforms({
       useTexture: !!gl.getParameter(gl.TEXTURE_BINDING_2D)
@@ -204,7 +204,7 @@ function addImmediateMode() {
 }
 
 // ### Improved mouse events
-// 
+//
 // This adds event listeners on the `gl.canvas` element that call
 // `gl.onmousedown()`, `gl.onmousemove()`, and `gl.onmouseup()` with an
 // augmented event object. The event object also has the properties `x`, `y`,
@@ -312,7 +312,7 @@ function addEventListeners() {
 }
 
 // ### Automatic keyboard state
-// 
+//
 // The current keyboard state is stored in `GL.keys`, a map of integer key
 // codes to booleans indicating whether that key is currently pressed. Certain
 // keys also have named identifiers that can be used directly, such as
@@ -363,7 +363,7 @@ on(document, 'keyup', function(e) {
 
 function addOtherMethods() {
   // ### Multiple contexts
-  // 
+  //
   // When using multiple contexts in one web page, `gl.makeCurrent()` must be
   // called before issuing commands to a different context.
   (function(context) {
@@ -373,7 +373,7 @@ function addOtherMethods() {
   })(gl);
 
   // ### Animation
-  // 
+  //
   // Call `gl.animate()` to provide an animation loop that repeatedly calls
   // `gl.onupdate()` and `gl.ondraw()`.
   gl.animate = function() {
@@ -396,23 +396,23 @@ function addOtherMethods() {
   };
 
   // ### Fullscreen
-  // 
+  //
   // Provide an easy way to get a fullscreen app running, including an
   // automatic 3D perspective projection matrix by default. This should be
   // called once.
-  // 
+  //
   // Just fullscreen, no automatic camera:
-  // 
+  //
   //     gl.fullscreen({ camera: false });
-  // 
+  //
   // Adjusting field of view, near plane distance, and far plane distance:
-  // 
+  //
   //     gl.fullscreen({ fov: 45, near: 0.1, far: 1000 });
-  // 
+  //
   // Adding padding from the edge of the window:
-  // 
+  //
   //     gl.fullscreen({ paddingLeft: 250, paddingBottom: 60 });
-  // 
+  //
   gl.fullscreen = function(options) {
     options = options || {};
     var top = options.paddingTop || 0;
@@ -420,8 +420,8 @@ function addOtherMethods() {
     var right = options.paddingRight || 0;
     var bottom = options.paddingBottom || 0;
     if (!document.body) {
-      throw 'document.body doesn\'t exist yet (call gl.fullscreen() from ' +
-        'window.onload() or from inside the <body> tag)';
+      throw new Error('document.body doesn\'t exist yet (call gl.fullscreen() from ' +
+        'window.onload() or from inside the <body> tag)');
     }
     document.body.appendChild(gl.canvas);
     document.body.style.overflow = 'hidden';
