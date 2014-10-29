@@ -16,6 +16,7 @@ var GL = {
     try { gl = canvas.getContext('webgl', options); } catch (e) {}
     try { gl = gl || canvas.getContext('experimental-webgl', options); } catch (e) {}
     if (!gl) throw new Error('WebGL not supported');
+    gl.HALF_FLOAT_OES = 0x8D61;
     addMatrixStack();
     addImmediateMode();
     addEventListeners();

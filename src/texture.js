@@ -29,10 +29,29 @@ function Texture(width, height, options) {
   this.height = height;
   this.format = options.format || gl.RGBA;
   this.type = options.type || gl.UNSIGNED_BYTE;
+  var magFilter = options.filter || options.magFilter || gl.LINEAR;
+  var minFilter = options.filter || options.minFilter || gl.LINEAR;
+  if (this.type === gl.FLOAT) {
+    if (!Texture.canUseFloatingPointTextures()) {
+      throw new Error('OES_texture_float is required but not supported');
+    }
+    if ((minFilter !== gl.NEAREST || magFilter !== gl.NEAREST) &&
+        !Texture.canUseFloatingPointLinearFiltering()) {
+      throw new Error('OES_texture_float_linear is required but not supported');
+    }
+  } else if (this.type === gl.HALF_FLOAT_OES) {
+    if (!Texture.canUseHalfFloatingPointTextures()) {
+      throw new Error('OES_texture_half_float is required but not supported');
+    }
+    if ((minFilter !== gl.NEAREST || magFilter !== gl.NEAREST) &&
+        !Texture.canUseHalfFloatingPointLinearFiltering()) {
+      throw new Error('OES_texture_half_float_linear is required but not supported');
+    }
+  }
   gl.bindTexture(gl.TEXTURE_2D, this.id);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, options.filter || options.magFilter || gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, options.filter || options.minFilter || gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magFilter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, options.wrap || options.wrapS || gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, options.wrap || options.wrapT || gl.CLAMP_TO_EDGE);
   gl.texImage2D(gl.TEXTURE_2D, 0, this.format, width, height, 0, this.format, this.type, null);
@@ -57,6 +76,19 @@ Texture.prototype = {
   unbind: function(unit) {
     gl.activeTexture(gl.TEXTURE0 + (unit || 0));
     gl.bindTexture(gl.TEXTURE_2D, null);
+  },
+
+  // ### .canDrawTo()
+  //
+  // Check if rendering to this texture is supported. It may not be supported
+  // for floating-point textures on some configurations.
+  canDrawTo: function() {
+    framebuffer = framebuffer || gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.id, 0);
+    var result = gl.checkFramebufferStatus(gl.FRAMEBUFFER) == gl.FRAMEBUFFER_COMPLETE;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    return result;
   },
 
   // ### .drawTo(callback)
@@ -85,6 +117,9 @@ Texture.prototype = {
     }
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.id, 0);
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE) {
+      throw new Error('Rendering to this texture is not supported (incomplete framebuffer)');
+    }
     gl.viewport(0, 0, this.width, this.height);
 
     callback();
@@ -153,4 +188,38 @@ Texture.fromURL = function(url, options) {
   };
   image.src = url;
   return texture;
+};
+
+// ### GL.Texture.canUseFloatingPointTextures()
+//
+// Returns false if `gl.FLOAT` is not supported as a texture type. This is the
+// `OES_texture_float` extension.
+Texture.canUseFloatingPointTextures = function() {
+  return !!gl.getExtension('OES_texture_float');
+};
+
+// ### GL.Texture.canUseFloatingPointLinearFiltering()
+//
+// Returns false if `gl.LINEAR` is not supported as a texture filter mode for
+// textures of type `gl.FLOAT`. This is the `OES_texture_float_linear`
+// extension.
+Texture.canUseFloatingPointLinearFiltering = function() {
+  return !!gl.getExtension('OES_texture_float_linear');
+};
+
+// ### GL.Texture.canUseFloatingPointTextures()
+//
+// Returns false if `gl.HALF_FLOAT_OES` is not supported as a texture type.
+// This is the `OES_texture_half_float` extension.
+Texture.canUseHalfFloatingPointTextures = function() {
+  return !!gl.getExtension('OES_texture_half_float');
+};
+
+// ### GL.Texture.canUseFloatingPointLinearFiltering()
+//
+// Returns false if `gl.LINEAR` is not supported as a texture filter mode for
+// textures of type `gl.HALF_FLOAT_OES`. This is the
+// `OES_texture_half_float_linear` extension.
+Texture.canUseHalfFloatingPointLinearFiltering = function() {
+  return !!gl.getExtension('OES_texture_half_float_linear');
 };
