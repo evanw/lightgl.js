@@ -12,7 +12,7 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
 The latest lightgl.js build can be found at http://evanw.github.com/lightgl.js/lightgl.js.
 
 ## Sample code
-
+```html
     <!DOCTYPE html>
     <html><body>
       <script src="lightgl.js"></script>
@@ -50,6 +50,7 @@ The latest lightgl.js build can be found at http://evanw.github.com/lightgl.js/l
 
       </script>
     </body></html>
+```
 
 ## Documentation
 
