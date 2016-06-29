@@ -123,6 +123,12 @@ function Shader(vertexSource, fragmentSource) {
   regexMap(/uniform\s+sampler(1D|2D|3D|Cube)\s+(\w+)\s*;/g, vertexSource + fragmentSource, function(groups) {
     isSampler[groups[2]] = 1;
   });
+
+  // also do this for items that are explicitly marked as `int` types
+  regexMap(/uniform\s+int\s+(\w+)\s*;/g, vertexSource + fragmentSource, function(groups) {
+    isSampler[groups[1]] = 1;
+  });
+  
   this.isSampler = isSampler;
 }
 
@@ -258,7 +264,16 @@ Shader.prototype = {
       } else {
         gl.drawArrays(mode, 0, length);
       }
-    }
+    }    
+    
+    // release any buffers;
+    // if the shader is switched, some attributes could still be linked to buffers, causing
+    // GL_INVALID_OPERATION : glDrawArrays: attempt to access out of range vertices in attribute [location]:
+    // see http://stackoverflow.com/questions/12427880/is-it-important-to-call-gldisablevertexattribarray
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    for (var attribute in vertexBuffers)
+      gl.disableVertexAttribArray(this.attributes[attribute]);
 
     return this;
   }
