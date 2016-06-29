@@ -42,7 +42,7 @@ def build():
         os.write(f1, data)
         os.close(f1)
         os.close(f2)
-        os.system('closure --js %s --js_output_file %s' % (temp1_path, temp2_path))
+        os.system('uglifyjs "%s" -mo "%s"' % (temp1_path, temp2_path))
         os.remove(temp1_path)
         data = open(temp2_path).read()
         os.remove(temp2_path)
