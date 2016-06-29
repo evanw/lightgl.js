@@ -60,7 +60,7 @@ Matrix.prototype = {
     ).divide(m[12] * v.x + m[13] * v.y + m[14] * v.z + m[15]);
   },
 
-  // ### .transformPoint(vector)
+  // ### .transformVector(vector)
   //
   // Transforms the vector as a vector with a w coordinate of 0. This
   // means translations will have no effect, for example.
