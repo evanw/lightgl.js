@@ -53,7 +53,7 @@ function Shader(vertexSource, fragmentSource) {
   ';
   var vertexHeader = header + '\
     attribute vec4 gl_Vertex;\
-    attribute vec4 gl_TexCoord;\
+    attribute vec2 gl_TexCoord;\
     attribute vec3 gl_Normal;\
     attribute vec4 gl_Color;\
     vec4 ftransform() {\
