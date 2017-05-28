@@ -20,6 +20,7 @@
 //     }).draw(mesh);
 
 function regexMap(regex, text, callback) {
+  var result = null;
   while ((result = regex.exec(text)) != null) {
     callback(result);
   }
