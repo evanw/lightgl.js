@@ -13,7 +13,14 @@ header = '''/*
  * Copyright 2011 Evan Wallace
  * Released under the MIT license
  */
-'''
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    (global.%s = factory());
+}(this, (function () { 'use strict';
+''' % module
+
+footer = '})));'
 
 def sources():
     return [os.path.join(base, f) for base, folders, files in \
@@ -35,7 +42,7 @@ def compress_glsl(text):
     return text
 
 def build():
-    data = 'var %s = (function() {\n\n%s\nreturn %s;\n})();\n' % (module, compile(sources()), module)
+    data = '\n%s\nreturn %s;\n' % (compile(sources()), module)
     if 'release' in sys.argv:
         f1, temp1_path = tempfile.mkstemp()
         f2, temp2_path = tempfile.mkstemp()
@@ -47,7 +54,7 @@ def build():
         data = open(temp2_path).read()
         os.remove(temp2_path)
         data = compress_glsl(data)
-    data = header + data
+    data = header + data + footer
     open(output_path, 'w').write(data)
     print 'built %s (%u lines)' % (output_path, len(data.split('\n')))
 
