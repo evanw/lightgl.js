@@ -1,0 +1,25 @@
+{
+  "name": "lightgl.js",
+  "version": "1.0.0",
+  "description": "A lightweight WebGL library",
+  "main": "lightgl.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juliendargelos/lightgl.js.git"
+  },
+  "keywords": [
+    "WebGL"
+  ],
+  "author": "Evan Wallace",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/juliendargelos/lightgl.js/issues"
+  },
+  "homepage": "https://github.com/juliendargelos/lightgl.js#readme"
+}

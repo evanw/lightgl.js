@@ -2,6 +2,12 @@
 
 This library makes it easier to quickly prototype WebGL applications. It's lower level than many other WebGL libraries and while it doesn't provide a scene graph, it re-implements OpenGL's modelview/projection matrix stack to provide similar functionality. It also re-introduces some built-in uniforms from GLSL (such as `gl_Vertex` and `gl_ModelViewProjectionMatrix`) and OpenGL's immediate mode.
 
+## Install from npm
+
+```shell
+npm install lightgl
+```
+
 ## Building the library
 
 * `python build.py`: build `lightgl.js` from the files in the `src` directory
