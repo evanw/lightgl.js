@@ -5,7 +5,7 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
 ## Install from npm
 
 ```shell
-npm install lightgl
+npm install lightgl.js
 ```
 
 ## Building the library
