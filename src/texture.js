@@ -207,6 +207,13 @@ Texture.canUseFloatingPointLinearFiltering = function() {
   return !!gl.getExtension('OES_texture_float_linear');
 };
 
+// ### GL.Texture.canUseFloatingPointRTT()
+//
+// Returns false if float32 textures can't be rendered to.
+Texture.canUseFloatingPointRTT = function() {
+  return !!gl.getExtension('WEBGL_color_buffer_float');
+};
+
 // ### GL.Texture.canUseFloatingPointTextures()
 //
 // Returns false if `gl.HALF_FLOAT_OES` is not supported as a texture type.
@@ -222,4 +229,11 @@ Texture.canUseHalfFloatingPointTextures = function() {
 // `OES_texture_half_float_linear` extension.
 Texture.canUseHalfFloatingPointLinearFiltering = function() {
   return !!gl.getExtension('OES_texture_half_float_linear');
+};
+
+// ### GL.Texture.canUseHalfFloatingPointRTT()
+//
+// Returns false if float16 textures can't be rendered to.
+Texture.canUseHalfFloatingPointRTT = function() {
+  return !!gl.getExtension('EXT_color_buffer_half_float');
 };
