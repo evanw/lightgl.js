@@ -1687,6 +1687,9 @@ function addOtherMethods() {
 // standard WebGL enums.
 var ENUM = 0x12340000;
 
+if (typeof module === 'object' && module.exports) {
+  module.exports = GL;
+}
 // src/raytracer.js
 // Provides a convenient raytracing interface.
 
