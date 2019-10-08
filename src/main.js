@@ -450,3 +450,7 @@ function addOtherMethods() {
 // A value to bitwise-or with new enums to make them distinguishable from the
 // standard WebGL enums.
 var ENUM = 0x12340000;
+
+if (typeof module === 'object' && module.exports) {
+  module.exports = GL;
+}
