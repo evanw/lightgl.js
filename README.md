@@ -9,7 +9,7 @@ This library makes it easier to quickly prototype WebGL applications. It's lower
 * `python build.py release`: minify the library using [UglifyJS](https://github.com/mishoo/UglifyJS2), which assumes there is an `uglifyjs` command in your path
 * `docco src/*.js`: build the documentation, which is generated in the `docs` directory
 
-The latest lightgl.js build can be found at http://evanw.github.com/lightgl.js/lightgl.js.
+The latest lightgl.js build can be found at http://evanw.github.io/lightgl.js/lightgl.js.
 
 ## Sample code
 ```html
@@ -56,25 +56,25 @@ The latest lightgl.js build can be found at http://evanw.github.com/lightgl.js/l
 
 The documentation is automatically generated using [Docco](http://jashkenas.github.com/docco/):
 
-* [main.js](http://evanw.github.com/lightgl.js/docs/main.html): `GL`
-* [matrix.js](http://evanw.github.com/lightgl.js/docs/matrix.html): `GL.Matrix`
-* [mesh.js](http://evanw.github.com/lightgl.js/docs/mesh.html): `GL.Indexer`, `GL.Buffer`, `GL.Mesh`
-* [raytracer.js](http://evanw.github.com/lightgl.js/docs/raytracer.html): `GL.HitTest`, `GL.Raytracer`
-* [shader.js](http://evanw.github.com/lightgl.js/docs/shader.html): `GL.Shader`
-* [texture.js](http://evanw.github.com/lightgl.js/docs/texture.html): `GL.Texture`
-* [vector.js](http://evanw.github.com/lightgl.js/docs/vector.html): `GL.Vector`
+* [main.js](http://evanw.github.io/lightgl.js/docs/main.html): `GL`
+* [matrix.js](http://evanw.github.io/lightgl.js/docs/matrix.html): `GL.Matrix`
+* [mesh.js](http://evanw.github.io/lightgl.js/docs/mesh.html): `GL.Indexer`, `GL.Buffer`, `GL.Mesh`
+* [raytracer.js](http://evanw.github.io/lightgl.js/docs/raytracer.html): `GL.HitTest`, `GL.Raytracer`
+* [shader.js](http://evanw.github.io/lightgl.js/docs/shader.html): `GL.Shader`
+* [texture.js](http://evanw.github.io/lightgl.js/docs/texture.html): `GL.Texture`
+* [vector.js](http://evanw.github.io/lightgl.js/docs/vector.html): `GL.Vector`
 
 ## Examples
 
 Available examples:
 
-* [Simple rotating cube](http://evanw.github.com/lightgl.js/tests/readme.html)
-* [Multitexturing](http://evanw.github.com/lightgl.js/tests/multitexture.html)
-* [First person camera](http://evanw.github.com/lightgl.js/tests/camera.html)
-* [Scene manipulation](http://evanw.github.com/lightgl.js/tests/scenemanip.html)
-* [OpenGL immediate mode](http://evanw.github.com/lightgl.js/tests/immediatemode.html)
-* [Rendering to a texture](http://evanw.github.com/lightgl.js/tests/rtt.html)
-* [Shadow map from a point light](http://evanw.github.com/lightgl.js/tests/shadowmap.html)
-* [Realtime raytracing](http://evanw.github.com/lightgl.js/tests/raytracing.html)
-* [Constructive solid geometry](http://evanw.github.com/lightgl.js/tests/csg.html)
-* [GPU lightmap generation](http://evanw.github.com/lightgl.js/tests/gpulightmap.html)
+* [Simple rotating cube](http://evanw.github.io/lightgl.js/tests/readme.html)
+* [Multitexturing](http://evanw.github.io/lightgl.js/tests/multitexture.html)
+* [First person camera](http://evanw.github.io/lightgl.js/tests/camera.html)
+* [Scene manipulation](http://evanw.github.io/lightgl.js/tests/scenemanip.html)
+* [OpenGL immediate mode](http://evanw.github.io/lightgl.js/tests/immediatemode.html)
+* [Rendering to a texture](http://evanw.github.io/lightgl.js/tests/rtt.html)
+* [Shadow map from a point light](http://evanw.github.io/lightgl.js/tests/shadowmap.html)
+* [Realtime raytracing](http://evanw.github.io/lightgl.js/tests/raytracing.html)
+* [Constructive solid geometry](http://evanw.github.io/lightgl.js/tests/csg.html)
+* [GPU lightmap generation](http://evanw.github.io/lightgl.js/tests/gpulightmap.html)
